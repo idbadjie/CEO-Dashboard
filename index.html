@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
-  ChevronDown, ChevronRight, AlertCircle, CheckCircle, Clock, TrendingUp,
-  Users, Target, AlertTriangle, Calendar, FileText, BarChart3, Plus, X,
-  Edit2, Save, TrendingDown, Minus, Activity, Award
+  AlertCircle, CheckCircle, Clock, TrendingUp,
+  AlertTriangle, Plus, X, Edit2, Save,
+  TrendingDown, Minus, Activity, Award
 } from 'lucide-react';
 
 const CEODashboard = () => {
@@ -210,10 +210,7 @@ const CEODashboard = () => {
     setDepartments(prev => prev.map(dept =>
       dept.id === deptId ? {
         ...dept,
-        keyMetrics: {
-          ...dept.keyMetrics,
-          [metric]: numeric
-        }
+        keyMetrics: { ...dept.keyMetrics, [metric]: numeric }
       } : dept
     ));
   };
@@ -237,7 +234,11 @@ const CEODashboard = () => {
       dept.id === deptId ? {
         ...dept,
         projects: dept.projects.map(p =>
-          p.id === projectId ? { ...p, [field]: field === 'completion' ? Math.min(100, Math.max(0, parseInt(value || 0, 10))) : value } : p
+          p.id === projectId
+            ? { ...p, [field]: field === 'completion'
+                ? Math.min(100, Math.max(0, parseInt(value || 0, 10)))
+                : value }
+            : p
         )
       } : dept
     ));
@@ -828,11 +829,11 @@ const CEODashboard = () => {
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-600">Avg Completion</span>
                         <div className="flex items-center gap-1">
-                          {dept.monthlyStats.avgCompletion > 70 ?
-                            <TrendingUp className="w-4 h-4 text-green-600" /> :
-                            dept.monthlyStats.avgCompletion > 40 ?
-                              <Minus className="w-4 h-4 text-yellow-600" /> :
-                              <TrendingDown className="w-4 h-4 text-red-600" />
+                          {dept.monthlyStats.avgCompletion > 70
+                            ? <TrendingUp className="w-4 h-4 text-green-600" />
+                            : dept.monthlyStats.avgCompletion > 40
+                              ? <Minus className="w-4 h-4 text-yellow-600" />
+                              : <TrendingDown className="w-4 h-4 text-red-600" />
                           }
                           <span className="font-semibold">{dept.monthlyStats.avgCompletion}%</span>
                         </div>
@@ -930,4 +931,3 @@ const CEODashboard = () => {
 };
 
 export default CEODashboard;
-
