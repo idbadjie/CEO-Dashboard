@@ -34,7 +34,7 @@
       };
 
       function CEODashboard() {
-        // Initial departments (you can edit names/managers)
+        // Initial departments (now includes Mariam - Human Resources)
         const initialDepartments = [
           { id: 'ops', name: 'Operations', manager: 'Jagan', status: 'green',
             keyMetrics: { efficiency: 0, tasksCompleted: 0, onTimeDelivery: 0, qualityScore: 0 },
@@ -54,6 +54,12 @@
           { id: 'finance', name: 'Finance', manager: 'Yusupha', status: 'green',
             keyMetrics: { budgetVariance: 0, cashFlow: 0, accountsReceivable: 0, costReduction: 0 },
             projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: new Date().toISOString().split('T')[0] } },
+
+          <!-- ✅ New Department -->
+          { id: 'hr', name: 'Human Resources', manager: 'Mariam', status: 'green',
+            keyMetrics: { retentionRate: 0, timeToHire: 0, trainingCompletion: 0, engagementScore: 0 },
+            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: new Date().toISOString().split('T')[0] } },
+
           { id: 'srops', name: 'Senior Operations', manager: 'Vic', status: 'green',
             keyMetrics: { strategicGoals: 0, crossTeamCollaboration: 0, processOptimization: 0, leadershipScore: 0 },
             projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: new Date().toISOString().split('T')[0] } },
@@ -343,7 +349,9 @@
                                 <input type="text" value={p.name}
                                   onChange={(e)=> updateProject(selectedDept.id, p.id, 'name', e.target.value)}
                                   className="font-medium text-gray-900 px-2 py-1 border rounded flex-1 mr-2"/>
-                              ) : <h4 className="font-medium text-gray-900">{p.name}</h4>}
+                              ) : (
+                                <h4 className="font-medium text-gray-900">{p.name}</h4>
+                              )}
                               <div className="flex items-center gap-2">
                                 {editMode ? (
                                   <select value={p.status}
@@ -514,9 +522,7 @@
                             <div className="flex justify-between items-center">
                               <span className="text-sm text-gray-600">Avg Completion</span>
                               <div className="flex items-center gap-1">
-                                <span>
-                                  {d.monthlyStats.avgCompletion>70 ? "📈" : d.monthlyStats.avgCompletion>40 ? "➖" : "📉"}
-                                </span>
+                                <span>{d.monthlyStats.avgCompletion>70 ? "📈" : d.monthlyStats.avgCompletion>40 ? "➖" : "📉"}</span>
                                 <span className="font-semibold">{d.monthlyStats.avgCompletion}%</span>
                               </div>
                             </div>
