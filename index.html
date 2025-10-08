@@ -1,1012 +1,1053 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CEO Visibility Dashboard</title>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-</head>
-<body>
-    <div id="root"></div>
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-        const { ChevronDown, ChevronRight, AlertCircle, CheckCircle, Clock, TrendingUp, Users, Target, AlertTriangle, Calendar, FileText, BarChart3, Plus, X, Edit2, Save, TrendingDown, Minus, Activity, Award } = lucide;
+import React, { useState, useEffect } from 'react';
+import { ChevronDown, ChevronRight, AlertCircle, CheckCircle, Clock, TrendingUp, Users, Target, AlertTriangle, Calendar, FileText, BarChart3, Plus, X, Edit2, Save, TrendingDown, Minus, Activity, Award } from 'lucide-react';
 
-        const CEODashboard = () => {
-          // Initialize departments with your team structure
-          const initialDepartments = [
-            {
-              id: 'ops',
-              name: 'Operations',
-              manager: 'Jagan',
-              status: 'green',
-              keyMetrics: {
-                efficiency: 0,
-                tasksCompleted: 0,
-                onTimeDelivery: 0,
-                qualityScore: 0
-              },
-              projects: [],
-              blockers: [],
-              weeklyUpdate: {
-                wins: '',
-                challenges: '',
-                nextWeek: '',
-                date: new Date().toISOString().split('T')[0]
-              },
-              monthlyMetrics: {
-                updateFrequency: 0,
-                responseTime: 0,
-                projectCompletion: 0
-              }
-            },
-            {
-              id: 'clinical',
-              name: 'Clinical Operations',
-              manager: 'Betty',
-              status: 'green',
-              keyMetrics: {
-                patientSatisfaction: 0,
-                clinicalAccuracy: 0,
-                processCompliance: 0,
-                turnaroundTime: 0
-              },
-              projects: [],
-              blockers: [],
-              weeklyUpdate: {
-                wins: '',
-                challenges: '',
-                nextWeek: '',
-                date: new Date().toISOString().split('T')[0]
-              },
-              monthlyMetrics: {
-                updateFrequency: 0,
-                responseTime: 0,
-                projectCompletion: 0
-              }
-            },
-            {
-              id: 'globalfund',
-              name: 'Global Fund',
-              manager: 'Nafi',
-              status: 'green',
-              keyMetrics: {
-                fundingSecured: 0,
-                proposalsSubmitted: 0,
-                complianceScore: 0,
-                reportingTimeliness: 0
-              },
-              projects: [],
-              blockers: [],
-              weeklyUpdate: {
-                wins: '',
-                challenges: '',
-                nextWeek: '',
-                date: new Date().toISOString().split('T')[0]
-              },
-              monthlyMetrics: {
-                updateFrequency: 0,
-                responseTime: 0,
-                projectCompletion: 0
-              }
-            },
-            {
-              id: 'retail',
-              name: 'Retail',
-              manager: 'Mabinta',
-              status: 'green',
-              keyMetrics: {
-                salesGrowth: 0,
-                inventoryTurnover: 0,
-                customerSatisfaction: 0,
-                storePerformance: 0
-              },
-              projects: [],
-              blockers: [],
-              weeklyUpdate: {
-                wins: '',
-                challenges: '',
-                nextWeek: '',
-                date: new Date().toISOString().split('T')[0]
-              },
-              monthlyMetrics: {
-                updateFrequency: 0,
-                responseTime: 0,
-                projectCompletion: 0
-              }
-            },
-            {
-              id: 'subscription',
-              name: 'Subscription',
-              manager: 'Lena',
-              status: 'green',
-              keyMetrics: {
-                monthlyRecurringRevenue: 0,
-                churnRate: 0,
-                customerAcquisition: 0,
-                retentionRate: 0
-              },
-              projects: [],
-              blockers: [],
-              weeklyUpdate: {
-                wins: '',
-                challenges: '',
-                nextWeek: '',
-                date: new Date().toISOString().split('T')[0]
-              },
-              monthlyMetrics: {
-                updateFrequency: 0,
-                responseTime: 0,
-                projectCompletion: 0
-              }
-            },
-            {
-              id: 'finance',
-              name: 'Finance',
-              manager: 'Yusupha',
-              status: 'green',
-              keyMetrics: {
-                budgetVariance: 0,
-                cashFlow: 0,
-                accountsReceivable: 0,
-                costReduction: 0
-              },
-              projects: [],
-              blockers: [],
-              weeklyUpdate: {
-                wins: '',
-                challenges: '',
-                nextWeek: '',
-                date: new Date().toISOString().split('T')[0]
-              },
-              monthlyMetrics: {
-                updateFrequency: 0,
-                responseTime: 0,
-                projectCompletion: 0
-              }
-            },
-            {
-              id: 'srops',
-              name: 'Senior Operations',
-              manager: 'Vic',
-              status: 'green',
-              keyMetrics: {
-                strategicGoals: 0,
-                crossTeamCollaboration: 0,
-                processOptimization: 0,
-                leadershipScore: 0
-              },
-              projects: [],
-              blockers: [],
-              weeklyUpdate: {
-                wins: '',
-                challenges: '',
-                nextWeek: '',
-                date: new Date().toISOString().split('T')[0]
-              },
-              monthlyMetrics: {
-                updateFrequency: 0,
-                responseTime: 0,
-                projectCompletion: 0
-              }
-            },
-            {
-              id: 'technology',
-              name: 'Technology',
-              manager: 'Kendesoft',
-              status: 'green',
-              keyMetrics: {
-                systemUptime: 0,
-                bugResolution: 0,
-                projectDelivery: 0,
-                innovationIndex: 0
-              },
-              projects: [],
-              blockers: [],
-              weeklyUpdate: {
-                wins: '',
-                challenges: '',
-                nextWeek: '',
-                date: new Date().toISOString().split('T')[0]
-              },
-              monthlyMetrics: {
-                updateFrequency: 0,
-                responseTime: 0,
-                projectCompletion: 0
-              }
-            },
-            {
-              id: 'logistics',
-              name: 'Logistics',
-              manager: 'Modou',
-              status: 'green',
-              keyMetrics: {
-                deliveryAccuracy: 0,
-                warehouseEfficiency: 0,
-                transportCost: 0,
-                orderFulfillment: 0
-              },
-              projects: [],
-              blockers: [],
-              weeklyUpdate: {
-                wins: '',
-                challenges: '',
-                nextWeek: '',
-                date: new Date().toISOString().split('T')[0]
-              },
-              monthlyMetrics: {
-                updateFrequency: 0,
-                responseTime: 0,
-                projectCompletion: 0
-              }
-            }
-          ];
+const CEODashboard = () => {
+  // Initialize departments with your team structure
+  const initialDepartments = [
+    {
+      id: 'ops',
+      name: 'Operations',
+      manager: 'Jagan',
+      status: 'green',
+      keyMetrics: {
+        efficiency: 0,
+        tasksCompleted: 0,
+        onTimeDelivery: 0,
+        qualityScore: 0
+      },
+      projects: [],
+      blockers: [],
+      weeklyUpdate: {
+        wins: '',
+        challenges: '',
+        nextWeek: '',
+        date: new Date().toISOString().split('T')[0]
+      },
+      monthlyMetrics: {
+        updateFrequency: 0,
+        responseTime: 0,
+        projectCompletion: 0
+      }
+    },
+    {
+      id: 'clinical',
+      name: 'Clinical Operations',
+      manager: 'Betty',
+      status: 'green',
+      keyMetrics: {
+        patientSatisfaction: 0,
+        clinicalAccuracy: 0,
+        processCompliance: 0,
+        turnaroundTime: 0
+      },
+      projects: [],
+      blockers: [],
+      weeklyUpdate: {
+        wins: '',
+        challenges: '',
+        nextWeek: '',
+        date: new Date().toISOString().split('T')[0]
+      },
+      monthlyMetrics: {
+        updateFrequency: 0,
+        responseTime: 0,
+        projectCompletion: 0
+      }
+    },
+    {
+      id: 'globalfund',
+      name: 'Global Fund',
+      manager: 'Nafi',
+      status: 'green',
+      keyMetrics: {
+        fundingSecured: 0,
+        proposalsSubmitted: 0,
+        complianceScore: 0,
+        reportingTimeliness: 0
+      },
+      projects: [],
+      blockers: [],
+      weeklyUpdate: {
+        wins: '',
+        challenges: '',
+        nextWeek: '',
+        date: new Date().toISOString().split('T')[0]
+      },
+      monthlyMetrics: {
+        updateFrequency: 0,
+        responseTime: 0,
+        projectCompletion: 0
+      }
+    },
+    {
+      id: 'retail',
+      name: 'Retail',
+      manager: 'Mabinta',
+      status: 'green',
+      keyMetrics: {
+        salesGrowth: 0,
+        inventoryTurnover: 0,
+        customerSatisfaction: 0,
+        storePerformance: 0
+      },
+      projects: [],
+      blockers: [],
+      weeklyUpdate: {
+        wins: '',
+        challenges: '',
+        nextWeek: '',
+        date: new Date().toISOString().split('T')[0]
+      },
+      monthlyMetrics: {
+        updateFrequency: 0,
+        responseTime: 0,
+        projectCompletion: 0
+      }
+    },
+    {
+      id: 'subscription',
+      name: 'Subscription',
+      manager: 'Lena',
+      status: 'green',
+      keyMetrics: {
+        monthlyRecurringRevenue: 0,
+        churnRate: 0,
+        customerAcquisition: 0,
+        retentionRate: 0
+      },
+      projects: [],
+      blockers: [],
+      weeklyUpdate: {
+        wins: '',
+        challenges: '',
+        nextWeek: '',
+        date: new Date().toISOString().split('T')[0]
+      },
+      monthlyMetrics: {
+        updateFrequency: 0,
+        responseTime: 0,
+        projectCompletion: 0
+      }
+    },
+    {
+      id: 'finance',
+      name: 'Finance',
+      manager: 'Yusupha',
+      status: 'green',
+      keyMetrics: {
+        budgetVariance: 0,
+        cashFlow: 0,
+        accountsReceivable: 0,
+        costReduction: 0
+      },
+      projects: [],
+      blockers: [],
+      weeklyUpdate: {
+        wins: '',
+        challenges: '',
+        nextWeek: '',
+        date: new Date().toISOString().split('T')[0]
+      },
+      monthlyMetrics: {
+        updateFrequency: 0,
+        responseTime: 0,
+        projectCompletion: 0
+      }
+    },
+    {
+      id: 'srops',
+      name: 'Senior Operations',
+      manager: 'Vic',
+      status: 'green',
+      keyMetrics: {
+        strategicGoals: 0,
+        crossTeamCollaboration: 0,
+        processOptimization: 0,
+        leadershipScore: 0
+      },
+      projects: [],
+      blockers: [],
+      weeklyUpdate: {
+        wins: '',
+        challenges: '',
+        nextWeek: '',
+        date: new Date().toISOString().split('T')[0]
+      },
+      monthlyMetrics: {
+        updateFrequency: 0,
+        responseTime: 0,
+        projectCompletion: 0
+      }
+    },
+    {
+      id: 'technology',
+      name: 'Technology',
+      manager: 'Kendesoft',
+      status: 'green',
+      keyMetrics: {
+        systemUptime: 0,
+        bugResolution: 0,
+        projectDelivery: 0,
+        innovationIndex: 0
+      },
+      projects: [],
+      blockers: [],
+      weeklyUpdate: {
+        wins: '',
+        challenges: '',
+        nextWeek: '',
+        date: new Date().toISOString().split('T')[0]
+      },
+      monthlyMetrics: {
+        updateFrequency: 0,
+        responseTime: 0,
+        projectCompletion: 0
+      }
+    },
+    {
+      id: 'logistics',
+      name: 'Logistics',
+      manager: 'Modou',
+      status: 'green',
+      keyMetrics: {
+        deliveryAccuracy: 0,
+        warehouseEfficiency: 0,
+        transportCost: 0,
+        orderFulfillment: 0
+      },
+      projects: [],
+      blockers: [],
+      weeklyUpdate: {
+        wins: '',
+        challenges: '',
+        nextWeek: '',
+        date: new Date().toISOString().split('T')[0]
+      },
+      monthlyMetrics: {
+        updateFrequency: 0,
+        responseTime: 0,
+        projectCompletion: 0
+      }
+    }
+  ];
 
-          // State management
-          const [departments, setDepartments] = useState(() => {
-            const saved = localStorage.getItem('ceoDashboardData');
-            return saved ? JSON.parse(saved) : initialDepartments;
-          });
-          
-          const [selectedDept, setSelectedDept] = useState(null);
-          const [viewMode, setViewMode] = useState('overview');
-          const [editMode, setEditMode] = useState(false);
-          const [newProject, setNewProject] = useState({ name: '', deadline: '', status: 'green', completion: 0 });
-          const [showProjectModal, setShowProjectModal] = useState(false);
-          const [updateHistory, setUpdateHistory] = useState(() => {
-            const saved = localStorage.getItem('updateHistory');
-            return saved ? JSON.parse(saved) : [];
-          });
-          const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
+  // State management
+  const [departments, setDepartments] = useState(() => {
+    const saved = localStorage.getItem('ceoDashboardData');
+    return saved ? JSON.parse(saved) : initialDepartments;
+  });
+  
+  const [selectedDept, setSelectedDept] = useState(null);
+  const [viewMode, setViewMode] = useState('overview');
+  const [editMode, setEditMode] = useState(false);
+  const [newProject, setNewProject] = useState({ name: '', deadline: '', status: 'green', completion: 0 });
+  const [showProjectModal, setShowProjectModal] = useState(false);
+  const [updateHistory, setUpdateHistory] = useState(() => {
+    const saved = localStorage.getItem('updateHistory');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
 
-          // Save to localStorage whenever data changes
-          useEffect(() => {
-            localStorage.setItem('ceoDashboardData', JSON.stringify(departments));
-          }, [departments]);
+  // Save to localStorage whenever data changes
+  useEffect(() => {
+    localStorage.setItem('ceoDashboardData', JSON.stringify(departments));
+  }, [departments]);
 
-          useEffect(() => {
-            localStorage.setItem('updateHistory', JSON.stringify(updateHistory));
-          }, [updateHistory]);
+  useEffect(() => {
+    localStorage.setItem('updateHistory', JSON.stringify(updateHistory));
+  }, [updateHistory]);
 
-          // Calculate manager performance metrics
-          const calculateManagerPerformance = (dept) => {
-            const now = new Date();
-            const updates = updateHistory.filter(h => h.deptId === dept.id);
-            const lastMonth = updates.filter(u => {
-              const updateDate = new Date(u.date);
-              return (now - updateDate) / (1000 * 60 * 60 * 24) <= 30;
-            });
-            
-            return {
-              updateFrequency: lastMonth.length,
-              avgResponseTime: dept.blockers.length > 0 ? '2 days' : 'N/A',
-              completionRate: dept.projects.length > 0 
-                ? Math.round(dept.projects.reduce((sum, p) => sum + p.completion, 0) / dept.projects.length)
-                : 0,
-              communicationScore: (dept.weeklyUpdate.wins || dept.weeklyUpdate.challenges) ? 'Good' : 'Needs Improvement'
-            };
-          };
+  // Calculate manager performance metrics
+  const calculateManagerPerformance = (dept) => {
+    const now = new Date();
+    const updates = updateHistory.filter(h => h.deptId === dept.id);
+    const lastMonth = updates.filter(u => {
+      const updateDate = new Date(u.date);
+      return (now - updateDate) / (1000 * 60 * 60 * 24) <= 30;
+    });
+    
+    return {
+      updateFrequency: lastMonth.length,
+      avgResponseTime: dept.blockers.length > 0 ? '2 days' : 'N/A',
+      completionRate: dept.projects.length > 0 
+        ? Math.round(dept.projects.reduce((sum, p) => sum + p.completion, 0) / dept.projects.length)
+        : 0,
+      communicationScore: (dept.weeklyUpdate.wins || dept.weeklyUpdate.challenges) ? 'Good' : 'Needs Improvement'
+    };
+  };
 
-          // Icon components
-          const ChevronDownIcon = () => React.createElement(ChevronDown, { className: "w-5 h-5" });
-          const ChevronRightIcon = () => React.createElement(ChevronRight, { className: "w-5 h-5" });
-          const AlertCircleIcon = () => React.createElement(AlertCircle, { className: "w-4 h-4 text-red-600" });
-          const CheckCircleIcon = () => React.createElement(CheckCircle, { className: "w-5 h-5" });
-          const AlertTriangleIcon = () => React.createElement(AlertTriangle, { className: "w-5 h-5" });
-          const ClockIcon = () => React.createElement(Clock, { className: "w-5 h-5" });
-          const PlusIcon = () => React.createElement(Plus, { className: "w-4 h-4" });
-          const XIcon = () => React.createElement(X, { className: "w-4 h-4" });
-          const Edit2Icon = () => React.createElement(Edit2, { className: "w-4 h-4" });
-          const SaveIcon = () => React.createElement(Save, { className: "w-4 h-4" });
-          const TrendingUpIcon = () => React.createElement(TrendingUp, { className: "w-4 h-4 text-green-600" });
-          const TrendingDownIcon = () => React.createElement(TrendingDown, { className: "w-4 h-4 text-red-600" });
-          const MinusIcon = () => React.createElement(Minus, { className: "w-4 h-4 text-yellow-600" });
-          const ActivityIcon = () => React.createElement(Activity, { className: "w-4 h-4" });
-          const AwardIcon = () => React.createElement(Award, { className: "w-4 h-4" });
+  // Utility functions
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'green': return 'text-green-600 bg-green-100';
+      case 'yellow': return 'text-yellow-600 bg-yellow-100';
+      case 'red': return 'text-red-600 bg-red-100';
+      default: return 'text-gray-600 bg-gray-100';
+    }
+  };
 
-          // Utility functions
-          const getStatusColor = (status) => {
-            switch(status) {
-              case 'green': return 'text-green-600 bg-green-100';
-              case 'yellow': return 'text-yellow-600 bg-yellow-100';
-              case 'red': return 'text-red-600 bg-red-100';
-              default: return 'text-gray-600 bg-gray-100';
-            }
-          };
+  const getStatusIcon = (status) => {
+    switch(status) {
+      case 'green': return <CheckCircle className="w-5 h-5" />;
+      case 'yellow': return <AlertTriangle className="w-5 h-5" />;
+      case 'red': return <AlertCircle className="w-5 h-5" />;
+      default: return <Clock className="w-5 h-5" />;
+    }
+  };
 
-          const getStatusIcon = (status) => {
-            switch(status) {
-              case 'green': return React.createElement(CheckCircleIcon);
-              case 'yellow': return React.createElement(AlertTriangleIcon);
-              case 'red': return React.createElement(AlertCircle, { className: "w-5 h-5" });
-              default: return React.createElement(ClockIcon);
-            }
-          };
+  // Update functions
+  const updateDepartmentStatus = (deptId, newStatus) => {
+    setDepartments(prev => prev.map(dept => 
+      dept.id === deptId ? { ...dept, status: newStatus } : dept
+    ));
+  };
 
-          // Update functions
-          const updateDepartmentStatus = (deptId, newStatus) => {
-            setDepartments(prev => prev.map(dept => 
-              dept.id === deptId ? { ...dept, status: newStatus } : dept
-            ));
-          };
+  const updateWeeklyUpdate = (deptId, field, value) => {
+    const updatedDepts = departments.map(dept => 
+      dept.id === deptId ? { 
+        ...dept, 
+        weeklyUpdate: { 
+          ...dept.weeklyUpdate, 
+          [field]: value,
+          date: new Date().toISOString().split('T')[0]
+        }
+      } : dept
+    );
+    setDepartments(updatedDepts);
+    
+    // Add to history
+    const historyEntry = {
+      deptId,
+      date: new Date().toISOString(),
+      type: 'weekly_update',
+      field,
+      value
+    };
+    setUpdateHistory(prev => [...prev, historyEntry]);
+  };
 
-          const updateWeeklyUpdate = (deptId, field, value) => {
-            const updatedDepts = departments.map(dept => 
-              dept.id === deptId ? { 
-                ...dept, 
-                weeklyUpdate: { 
-                  ...dept.weeklyUpdate, 
-                  [field]: value,
-                  date: new Date().toISOString().split('T')[0]
-                }
-              } : dept
-            );
-            setDepartments(updatedDepts);
-            
-            const historyEntry = {
-              deptId,
-              date: new Date().toISOString(),
-              type: 'weekly_update',
-              field,
-              value
-            };
-            setUpdateHistory(prev => [...prev, historyEntry]);
-          };
+  const updateMetric = (deptId, metric, value) => {
+    setDepartments(prev => prev.map(dept => 
+      dept.id === deptId ? { 
+        ...dept, 
+        keyMetrics: { 
+          ...dept.keyMetrics, 
+          [metric]: value 
+        }
+      } : dept
+    ));
+  };
 
-          const updateMetric = (deptId, metric, value) => {
-            setDepartments(prev => prev.map(dept => 
-              dept.id === deptId ? { 
-                ...dept, 
-                keyMetrics: { 
-                  ...dept.keyMetrics, 
-                  [metric]: value 
-                }
-              } : dept
-            ));
-          };
+  const addProject = (deptId) => {
+    if (!newProject.name) return;
+    
+    setDepartments(prev => prev.map(dept => 
+      dept.id === deptId ? { 
+        ...dept, 
+        projects: [...dept.projects, { ...newProject, id: Date.now() }]
+      } : dept
+    ));
+    
+    setNewProject({ name: '', deadline: '', status: 'green', completion: 0 });
+    setShowProjectModal(false);
+  };
 
-          const addProject = (deptId) => {
-            if (!newProject.name) return;
-            
-            setDepartments(prev => prev.map(dept => 
-              dept.id === deptId ? { 
-                ...dept, 
-                projects: [...dept.projects, { ...newProject, id: Date.now() }]
-              } : dept
-            ));
-            
-            setNewProject({ name: '', deadline: '', status: 'green', completion: 0 });
-            setShowProjectModal(false);
-          };
+  const updateProject = (deptId, projectId, field, value) => {
+    setDepartments(prev => prev.map(dept => 
+      dept.id === deptId ? {
+        ...dept,
+        projects: dept.projects.map(p => 
+          p.id === projectId ? { ...p, [field]: value } : p
+        )
+      } : dept
+    ));
+  };
 
-          const updateProject = (deptId, projectId, field, value) => {
-            setDepartments(prev => prev.map(dept => 
-              dept.id === deptId ? {
-                ...dept,
-                projects: dept.projects.map(p => 
-                  p.id === projectId ? { ...p, [field]: value } : p
-                )
-              } : dept
-            ));
-          };
+  const deleteProject = (deptId, projectId) => {
+    setDepartments(prev => prev.map(dept => 
+      dept.id === deptId ? {
+        ...dept,
+        projects: dept.projects.filter(p => p.id !== projectId)
+      } : dept
+    ));
+  };
 
-          const deleteProject = (deptId, projectId) => {
-            setDepartments(prev => prev.map(dept => 
-              dept.id === deptId ? {
-                ...dept,
-                projects: dept.projects.filter(p => p.id !== projectId)
-              } : dept
-            ));
-          };
+  const addBlocker = (deptId, blocker) => {
+    if (!blocker.trim()) return;
+    
+    setDepartments(prev => prev.map(dept => 
+      dept.id === deptId ? { 
+        ...dept, 
+        blockers: [...dept.blockers, { id: Date.now(), text: blocker, date: new Date().toISOString() }]
+      } : dept
+    ));
+  };
 
-          const addBlocker = (deptId, blocker) => {
-            if (!blocker.trim()) return;
-            
-            setDepartments(prev => prev.map(dept => 
-              dept.id === deptId ? { 
-                ...dept, 
-                blockers: [...dept.blockers, { id: Date.now(), text: blocker, date: new Date().toISOString() }]
-              } : dept
-            ));
-          };
+  const removeBlocker = (deptId, blockerId) => {
+    setDepartments(prev => prev.map(dept => 
+      dept.id === deptId ? { 
+        ...dept, 
+        blockers: dept.blockers.filter(b => b.id !== blockerId)
+      } : dept
+    ));
+  };
 
-          const removeBlocker = (deptId, blockerId) => {
-            setDepartments(prev => prev.map(dept => 
-              dept.id === deptId ? { 
-                ...dept, 
-                blockers: dept.blockers.filter(b => b.id !== blockerId)
-              } : dept
-            ));
-          };
+  // Generate monthly snapshot
+  const getMonthlySnapshot = () => {
+    const monthData = updateHistory.filter(h => 
+      h.date.startsWith(selectedMonth)
+    );
+    
+    const deptPerformance = departments.map(dept => {
+      const deptUpdates = monthData.filter(u => u.deptId === dept.id);
+      const completedProjects = dept.projects.filter(p => p.completion === 100).length;
+      const totalProjects = dept.projects.length;
+      
+      return {
+        ...dept,
+        monthlyStats: {
+          updates: deptUpdates.length,
+          projectsCompleted: completedProjects,
+          projectsTotal: totalProjects,
+          avgCompletion: totalProjects > 0 
+            ? Math.round(dept.projects.reduce((sum, p) => sum + p.completion, 0) / totalProjects)
+            : 0,
+          blockerCount: dept.blockers.length
+        }
+      };
+    });
+    
+    return deptPerformance;
+  };
 
-          const getMonthlySnapshot = () => {
-            const monthData = updateHistory.filter(h => 
-              h.date.startsWith(selectedMonth)
-            );
-            
-            const deptPerformance = departments.map(dept => {
-              const deptUpdates = monthData.filter(u => u.deptId === dept.id);
-              const completedProjects = dept.projects.filter(p => p.completion === 100).length;
-              const totalProjects = dept.projects.length;
-              
-              return {
-                ...dept,
-                monthlyStats: {
-                  updates: deptUpdates.length,
-                  projectsCompleted: completedProjects,
-                  projectsTotal: totalProjects,
-                  avgCompletion: totalProjects > 0 
-                    ? Math.round(dept.projects.reduce((sum, p) => sum + p.completion, 0) / totalProjects)
-                    : 0,
-                  blockerCount: dept.blockers.length
-                }
-              };
-            });
-            
-            return deptPerformance;
-          };
+  return (
+    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">CEO Visibility Dashboard</h1>
+              <p className="text-gray-600 mt-2">Real-time visibility across all departments</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setViewMode('overview')}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  viewMode === 'overview' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Overview
+              </button>
+              <button
+                onClick={() => setViewMode('details')}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  viewMode === 'details' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Details
+              </button>
+              <button
+                onClick={() => setViewMode('updates')}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  viewMode === 'updates' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Weekly Updates
+              </button>
+              <button
+                onClick={() => setViewMode('monthly')}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  viewMode === 'monthly' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Monthly Snapshot
+              </button>
+            </div>
+          </div>
 
-          return (
-            React.createElement('div', { className: "min-h-screen bg-gray-50 p-4 md:p-6" },
-              React.createElement('div', { className: "max-w-7xl mx-auto" },
-                // Header
-                React.createElement('div', { className: "bg-white rounded-lg shadow-sm p-6 mb-6" },
-                  React.createElement('div', { className: "flex flex-col md:flex-row justify-between items-start md:items-center gap-4" },
-                    React.createElement('div', null,
-                      React.createElement('h1', { className: "text-2xl md:text-3xl font-bold text-gray-900" }, 'CEO Visibility Dashboard'),
-                      React.createElement('p', { className: "text-gray-600 mt-2" }, 'Real-time visibility across all departments')
-                    ),
-                    React.createElement('div', { className: "flex flex-wrap gap-2" },
-                      React.createElement('button', {
-                        onClick: () => setViewMode('overview'),
-                        className: `px-4 py-2 rounded-lg font-medium transition-colors ${
-                          viewMode === 'overview' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`
-                      }, 'Overview'),
-                      React.createElement('button', {
-                        onClick: () => setViewMode('details'),
-                        className: `px-4 py-2 rounded-lg font-medium transition-colors ${
-                          viewMode === 'details' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`
-                      }, 'Details'),
-                      React.createElement('button', {
-                        onClick: () => setViewMode('updates'),
-                        className: `px-4 py-2 rounded-lg font-medium transition-colors ${
-                          viewMode === 'updates' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`
-                      }, 'Weekly Updates'),
-                      React.createElement('button', {
-                        onClick: () => setViewMode('monthly'),
-                        className: `px-4 py-2 rounded-lg font-medium transition-colors ${
-                          viewMode === 'monthly' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`
-                      }, 'Monthly Snapshot')
-                    )
-                  ),
+          {/* Quick Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-6">
+            <div className="bg-green-50 rounded-lg p-3">
+              <div className="flex items-center justify-between">
+                <span className="text-green-900 font-medium text-sm">On Track</span>
+                <span className="text-xl font-bold text-green-600">
+                  {departments.filter(d => d.status === 'green').length}
+                </span>
+              </div>
+            </div>
+            <div className="bg-yellow-50 rounded-lg p-3">
+              <div className="flex items-center justify-between">
+                <span className="text-yellow-900 font-medium text-sm">At Risk</span>
+                <span className="text-xl font-bold text-yellow-600">
+                  {departments.filter(d => d.status === 'yellow').length}
+                </span>
+              </div>
+            </div>
+            <div className="bg-red-50 rounded-lg p-3">
+              <div className="flex items-center justify-between">
+                <span className="text-red-900 font-medium text-sm">Off Track</span>
+                <span className="text-xl font-bold text-red-600">
+                  {departments.filter(d => d.status === 'red').length}
+                </span>
+              </div>
+            </div>
+            <div className="bg-blue-50 rounded-lg p-3">
+              <div className="flex items-center justify-between">
+                <span className="text-blue-900 font-medium text-sm">Blockers</span>
+                <span className="text-xl font-bold text-blue-600">
+                  {departments.reduce((sum, d) => sum + d.blockers.length, 0)}
+                </span>
+              </div>
+            </div>
+            <div className="bg-purple-50 rounded-lg p-3">
+              <div className="flex items-center justify-between">
+                <span className="text-purple-900 font-medium text-sm">Projects</span>
+                <span className="text-xl font-bold text-purple-600">
+                  {departments.reduce((sum, d) => sum + d.projects.length, 0)}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
 
-                  // Quick Stats
-                  React.createElement('div', { className: "grid grid-cols-2 md:grid-cols-5 gap-3 mt-6" },
-                    React.createElement('div', { className: "bg-green-50 rounded-lg p-3" },
-                      React.createElement('div', { className: "flex items-center justify-between" },
-                        React.createElement('span', { className: "text-green-900 font-medium text-sm" }, 'On Track'),
-                        React.createElement('span', { className: "text-xl font-bold text-green-600" },
-                          departments.filter(d => d.status === 'green').length
-                        )
-                      )
-                    ),
-                    React.createElement('div', { className: "bg-yellow-50 rounded-lg p-3" },
-                      React.createElement('div', { className: "flex items-center justify-between" },
-                        React.createElement('span', { className: "text-yellow-900 font-medium text-sm" }, 'At Risk'),
-                        React.createElement('span', { className: "text-xl font-bold text-yellow-600" },
-                          departments.filter(d => d.status === 'yellow').length
-                        )
-                      )
-                    ),
-                    React.createElement('div', { className: "bg-red-50 rounded-lg p-3" },
-                      React.createElement('div', { className: "flex items-center justify-between" },
-                        React.createElement('span', { className: "text-red-900 font-medium text-sm" }, 'Off Track'),
-                        React.createElement('span', { className: "text-xl font-bold text-red-600" },
-                          departments.filter(d => d.status === 'red').length
-                        )
-                      )
-                    ),
-                    React.createElement('div', { className: "bg-blue-50 rounded-lg p-3" },
-                      React.createElement('div', { className: "flex items-center justify-between" },
-                        React.createElement('span', { className: "text-blue-900 font-medium text-sm" }, 'Blockers'),
-                        React.createElement('span', { className: "text-xl font-bold text-blue-600" },
-                          departments.reduce((sum, d) => sum + d.blockers.length, 0)
-                        )
-                      )
-                    ),
-                    React.createElement('div', { className: "bg-purple-50 rounded-lg p-3" },
-                      React.createElement('div', { className: "flex items-center justify-between" },
-                        React.createElement('span', { className: "text-purple-900 font-medium text-sm" }, 'Projects'),
-                        React.createElement('span', { className: "text-xl font-bold text-purple-600" },
-                          departments.reduce((sum, d) => sum + d.projects.length, 0)
-                        )
-                      )
-                    )
-                  )
-                ),
+        {/* Overview Mode */}
+        {viewMode === 'overview' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {departments.map(dept => (
+              <div key={dept.id} className="bg-white rounded-lg shadow-sm p-5 hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">{dept.name}</h3>
+                    <p className="text-sm text-gray-600">{dept.manager}</p>
+                  </div>
+                  <div className={`px-2 py-1 rounded-full flex items-center gap-1 ${getStatusColor(dept.status)}`}>
+                    {getStatusIcon(dept.status)}
+                    <span className="font-medium capitalize text-sm">{dept.status}</span>
+                  </div>
+                </div>
 
-                // Overview Mode
-                viewMode === 'overview' && React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" },
-                  departments.map(dept =>
-                    React.createElement('div', { key: dept.id, className: "bg-white rounded-lg shadow-sm p-5 hover:shadow-md transition-shadow" },
-                      React.createElement('div', { className: "flex justify-between items-start mb-4" },
-                        React.createElement('div', null,
-                          React.createElement('h3', { className: "text-lg font-semibold text-gray-900" }, dept.name),
-                          React.createElement('p', { className: "text-sm text-gray-600" }, dept.manager)
-                        ),
-                        React.createElement('div', { className: `px-2 py-1 rounded-full flex items-center gap-1 ${getStatusColor(dept.status)}` },
-                          getStatusIcon(dept.status),
-                          React.createElement('span', { className: "font-medium capitalize text-sm" }, dept.status)
-                        )
-                      ),
+                {/* Projects Summary */}
+                {dept.projects.length > 0 ? (
+                  <div className="space-y-2 mb-4">
+                    {dept.projects.slice(0, 2).map((project) => (
+                      <div key={project.id} className="flex items-center justify-between">
+                        <span className="text-sm text-gray-700 truncate max-w-[60%]">{project.name}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-16 bg-gray-200 rounded-full h-1.5">
+                            <div 
+                              className={`h-1.5 rounded-full ${
+                                project.status === 'green' ? 'bg-green-500' : 
+                                project.status === 'yellow' ? 'bg-yellow-500' : 'bg-red-500'
+                              }`}
+                              style={{ width: `${project.completion}%` }}
+                            />
+                          </div>
+                          <span className="text-xs text-gray-600">{project.completion}%</span>
+                        </div>
+                      </div>
+                    ))}
+                    {dept.projects.length > 2 && (
+                      <p className="text-xs text-gray-500">+{dept.projects.length - 2} more projects</p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500 mb-4">No active projects</p>
+                )}
 
-                      dept.projects.length > 0 ? React.createElement('div', { className: "space-y-2 mb-4" },
-                        dept.projects.slice(0, 2).map((project) =>
-                          React.createElement('div', { key: project.id, className: "flex items-center justify-between" },
-                            React.createElement('span', { className: "text-sm text-gray-700 truncate max-w-[60%]" }, project.name),
-                            React.createElement('div', { className: "flex items-center gap-2" },
-                              React.createElement('div', { className: "w-16 bg-gray-200 rounded-full h-1.5" },
-                                React.createElement('div', {
-                                  className: `h-1.5 rounded-full ${
-                                    project.status === 'green' ? 'bg-green-500' : 
-                                    project.status === 'yellow' ? 'bg-yellow-500' : 'bg-red-500'
-                                  }`,
-                                  style: { width: `${project.completion}%` }
-                                })
-                              ),
-                              React.createElement('span', { className: "text-xs text-gray-600" }, `${project.completion}%`)
-                            )
-                          )
-                        ),
-                        dept.projects.length > 2 && React.createElement('p', { className: "text-xs text-gray-500" }, `+${dept.projects.length - 2} more projects`)
-                      ) : React.createElement('p', { className: "text-sm text-gray-500 mb-4" }, 'No active projects'),
+                {/* Blockers */}
+                {dept.blockers.length > 0 && (
+                  <div className="bg-red-50 rounded-lg p-3 mb-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <AlertCircle className="w-4 h-4 text-red-600" />
+                      <span className="text-sm font-medium text-red-900">
+                        {dept.blockers.length} Blocker{dept.blockers.length > 1 ? 's' : ''}
+                      </span>
+                    </div>
+                    <p className="text-xs text-red-800 truncate">{dept.blockers[0].text}</p>
+                  </div>
+                )}
 
-                      dept.blockers.length > 0 && React.createElement('div', { className: "bg-red-50 rounded-lg p-3 mb-3" },
-                        React.createElement('div', { className: "flex items-center gap-2 mb-1" },
-                          React.createElement(AlertCircleIcon),
-                          React.createElement('span', { className: "text-sm font-medium text-red-900" },
-                            `${dept.blockers.length} Blocker${dept.blockers.length > 1 ? 's' : ''}`
-                          )
-                        ),
-                        React.createElement('p', { className: "text-xs text-red-800 truncate" }, dept.blockers[0].text)
-                      ),
+                {/* Last Update */}
+                <div className="flex items-center justify-between text-xs text-gray-500">
+                  <span>Last update: {dept.weeklyUpdate.date}</span>
+                  <button
+                    onClick={() => {
+                      setSelectedDept(dept);
+                      setViewMode('details');
+                    }}
+                    className="text-blue-600 hover:text-blue-700 font-medium"
+                  >
+                    View →
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
-                      React.createElement('div', { className: "flex items-center justify-between text-xs text-gray-500" },
-                        React.createElement('span', null, `Last update: ${dept.weeklyUpdate.date}`),
-                        React.createElement('button', {
-                          onClick: () => {
-                            setSelectedDept(dept);
-                            setViewMode('details');
-                          },
-                          className: "text-blue-600 hover:text-blue-700 font-medium"
-                        }, 'View →')
-                      )
-                    )
-                  )
-                ),
+        {/* Details Mode */}
+        {viewMode === 'details' && selectedDept && (
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">{selectedDept.name}</h2>
+                <p className="text-gray-600">Manager: {selectedDept.manager}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setEditMode(!editMode)}
+                  className={`px-3 py-1.5 rounded-lg font-medium flex items-center gap-2 ${
+                    editMode ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-700'
+                  }`}
+                >
+                  {editMode ? <Save className="w-4 h-4" /> : <Edit2 className="w-4 h-4" />}
+                  {editMode ? 'Save' : 'Edit'}
+                </button>
+                <select
+                  value={selectedDept.status}
+                  onChange={(e) => updateDepartmentStatus(selectedDept.id, e.target.value)}
+                  className={`px-4 py-2 rounded-lg font-medium border-2 ${getStatusColor(selectedDept.status)}`}
+                >
+                  <option value="green">🟢 On Track</option>
+                  <option value="yellow">🟡 At Risk</option>
+                  <option value="red">🔴 Off Track</option>
+                </select>
+              </div>
+            </div>
 
-                // Details Mode
-                viewMode === 'details' && selectedDept && React.createElement('div', { className: "bg-white rounded-lg shadow-sm p-6" },
-                  React.createElement('div', { className: "flex justify-between items-start mb-6" },
-                    React.createElement('div', null,
-                      React.createElement('h2', { className: "text-2xl font-bold text-gray-900" }, selectedDept.name),
-                      React.createElement('p', { className: "text-gray-600" }, `Manager: ${selectedDept.manager}`)
-                    ),
-                    React.createElement('div', { className: "flex items-center gap-2" },
-                      React.createElement('button', {
-                        onClick: () => setEditMode(!editMode),
-                        className: `px-3 py-1.5 rounded-lg font-medium flex items-center gap-2 ${
-                          editMode ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-700'
-                        }`
-                      }, 
-                        editMode ? React.createElement(SaveIcon) : React.createElement(Edit2Icon),
-                        editMode ? 'Save' : 'Edit'
-                      ),
-                      React.createElement('select', {
-                        value: selectedDept.status,
-                        onChange: (e) => updateDepartmentStatus(selectedDept.id, e.target.value),
-                        className: `px-4 py-2 rounded-lg font-medium border-2 ${getStatusColor(selectedDept.status)}`
-                      },
-                        React.createElement('option', { value: "green" }, '🟢 On Track'),
-                        React.createElement('option', { value: "yellow" }, '🟡 At Risk'),
-                        React.createElement('option', { value: "red" }, '🔴 Off Track')
-                      )
-                    )
-                  ),
+            {/* Key Metrics */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Key Metrics</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {Object.entries(selectedDept.keyMetrics).map(([key, value]) => (
+                  <div key={key} className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-sm text-gray-600 capitalize mb-1">
+                      {key.replace(/([A-Z])/g, ' $1').trim()}
+                    </p>
+                    {editMode ? (
+                      <input
+                        type="number"
+                        value={value}
+                        onChange={(e) => updateMetric(selectedDept.id, key, parseFloat(e.target.value))}
+                        className="w-full px-2 py-1 border rounded"
+                      />
+                    ) : (
+                      <p className="text-2xl font-bold text-gray-900">
+                        {typeof value === 'number' && key.includes('Rate') ? `${value}%` :
+                         typeof value === 'number' && (key.includes('Revenue') || key.includes('Cost')) ? `$${value.toLocaleString()}` :
+                         value || 0}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
 
-                  // Key Metrics
-                  React.createElement('div', { className: "mb-6" },
-                    React.createElement('h3', { className: "text-lg font-semibold text-gray-900 mb-4" }, 'Key Metrics'),
-                    React.createElement('div', { className: "grid grid-cols-2 md:grid-cols-4 gap-4" },
-                      Object.entries(selectedDept.keyMetrics).map(([key, value]) =>
-                        React.createElement('div', { key, className: "bg-gray-50 rounded-lg p-4" },
-                          React.createElement('p', { className: "text-sm text-gray-600 capitalize mb-1" },
-                            key.replace(/([A-Z])/g, ' $1').trim()
-                          ),
-                          editMode ? React.createElement('input', {
-                            type: "number",
-                            value,
-                            onChange: (e) => updateMetric(selectedDept.id, key, parseFloat(e.target.value)),
-                            className: "w-full px-2 py-1 border rounded"
-                          }) : React.createElement('p', { className: "text-2xl font-bold text-gray-900" },
-                            typeof value === 'number' && key.includes('Rate') ? `${value}%` :
-                            typeof value === 'number' && (key.includes('Revenue') || key.includes('Cost')) ? `$${value.toLocaleString()}` :
-                            value || 0
-                          )
-                        )
-                      )
-                    )
-                  ),
+            {/* Projects */}
+            <div className="mb-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Projects</h3>
+                {editMode && (
+                  <button
+                    onClick={() => setShowProjectModal(true)}
+                    className="px-3 py-1.5 bg-blue-600 text-white rounded-lg font-medium flex items-center gap-1"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add Project
+                  </button>
+                )}
+              </div>
 
-                  // Projects
-                  React.createElement('div', { className: "mb-6" },
-                    React.createElement('div', { className: "flex justify-between items-center mb-4" },
-                      React.createElement('h3', { className: "text-lg font-semibold text-gray-900" }, 'Projects'),
-                      editMode && React.createElement('button', {
-                        onClick: () => setShowProjectModal(true),
-                        className: "px-3 py-1.5 bg-blue-600 text-white rounded-lg font-medium flex items-center gap-1"
-                      },
-                        React.createElement(PlusIcon),
-                        'Add Project'
-                      )
-                    ),
+              {selectedDept.projects.length > 0 ? (
+                <div className="space-y-3">
+                  {selectedDept.projects.map((project) => (
+                    <div key={project.id} className="border rounded-lg p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        {editMode ? (
+                          <input
+                            type="text"
+                            value={project.name}
+                            onChange={(e) => updateProject(selectedDept.id, project.id, 'name', e.target.value)}
+                            className="font-medium text-gray-900 px-2 py-1 border rounded flex-1 mr-2"
+                          />
+                        ) : (
+                          <h4 className="font-medium text-gray-900">{project.name}</h4>
+                        )}
+                        <div className="flex items-center gap-2">
+                          {editMode && (
+                            <select
+                              value={project.status}
+                              onChange={(e) => updateProject(selectedDept.id, project.id, 'status', e.target.value)}
+                              className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(project.status)}`}
+                            >
+                              <option value="green">Green</option>
+                              <option value="yellow">Yellow</option>
+                              <option value="red">Red</option>
+                            </select>
+                          )}
+                          {!editMode && (
+                            <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(project.status)}`}>
+                              {project.status.toUpperCase()}
+                            </span>
+                          )}
+                          {editMode && (
+                            <button
+                              onClick={() => deleteProject(selectedDept.id, project.id)}
+                              className="text-red-500 hover:text-red-600"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="flex-1">
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div 
+                              className={`h-2 rounded-full ${
+                                project.status === 'green' ? 'bg-green-500' : 
+                                project.status === 'yellow' ? 'bg-yellow-500' : 'bg-red-500'
+                              }`}
+                              style={{ width: `${project.completion}%` }}
+                            />
+                          </div>
+                        </div>
+                        {editMode ? (
+                          <input
+                            type="number"
+                            value={project.completion}
+                            onChange={(e) => updateProject(selectedDept.id, project.id, 'completion', parseInt(e.target.value))}
+                            className="w-16 px-2 py-1 border rounded text-sm"
+                            min="0"
+                            max="100"
+                          />
+                        ) : (
+                          <span className="text-sm text-gray-600">{project.completion}%</span>
+                        )}
+                        <span className="text-sm text-gray-600">Due: {project.deadline || 'TBD'}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500">No projects added yet</p>
+              )}
+            </div>
 
-                    selectedDept.projects.length > 0 ? React.createElement('div', { className: "space-y-3" },
-                      selectedDept.projects.map((project) =>
-                        React.createElement('div', { key: project.id, className: "border rounded-lg p-4" },
-                          React.createElement('div', { className: "flex justify-between items-start mb-2" },
-                            editMode ? React.createElement('input', {
-                              type: "text",
-                              value: project.name,
-                              onChange: (e) => updateProject(selectedDept.id, project.id, 'name', e.target.value),
-                              className: "font-medium text-gray-900 px-2 py-1 border rounded flex-1 mr-2"
-                            }) : React.createElement('h4', { className: "font-medium text-gray-900" }, project.name),
-                            React.createElement('div', { className: "flex items-center gap-2" },
-                              editMode && React.createElement('select', {
-                                value: project.status,
-                                onChange: (e) => updateProject(selectedDept.id, project.id, 'status', e.target.value),
-                                className: `px-2 py-1 rounded text-xs font-medium ${getStatusColor(project.status)}`
-                              },
-                                React.createElement('option', { value: "green" }, 'Green'),
-                                React.createElement('option', { value: "yellow" }, 'Yellow'),
-                                React.createElement('option', { value: "red" }, 'Red')
-                              ),
-                              !editMode && React.createElement('span', { 
-                                className: `px-2 py-1 rounded text-xs font-medium ${getStatusColor(project.status)}` 
-                              }, project.status.toUpperCase()),
-                              editMode && React.createElement('button', {
-                                onClick: () => deleteProject(selectedDept.id, project.id),
-                                className: "text-red-500 hover:text-red-600"
-                              }, React.createElement(XIcon))
-                            )
-                          ),
-                          React.createElement('div', { className: "flex items-center gap-4" },
-                            React.createElement('div', { className: "flex-1" },
-                              React.createElement('div', { className: "w-full bg-gray-200 rounded-full h-2" },
-                                React.createElement('div', {
-                                  className: `h-2 rounded-full ${
-                                    project.status === 'green' ? 'bg-green-500' : 
-                                    project.status === 'yellow' ? 'bg-yellow-500' : 'bg-red-500'
-                                  }`,
-                                  style: { width: `${project.completion}%` }
-                                })
-                              )
-                            ),
-                            editMode ? React.createElement('input', {
-                              type: "number",
-                              value: project.completion,
-                              onChange: (e) => updateProject(selectedDept.id, project.id, 'completion', parseInt(e.target.value)),
-                              className: "w-16 px-2 py-1 border rounded text-sm",
-                              min: "0",
-                              max: "100"
-                            }) : React.createElement('span', { className: "text-sm text-gray-600" }, `${project.completion}%`),
-                            React.createElement('span', { className: "text-sm text-gray-600" }, `Due: ${project.deadline || 'TBD'}`)
-                          )
-                        )
-                      )
-                    ) : React.createElement('p', { className: "text-gray-500" }, 'No projects added yet')
-                  ),
+            {/* Blockers */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Blockers & Escalations</h3>
+              <div className="space-y-2">
+                {selectedDept.blockers.map((blocker) => (
+                  <div key={blocker.id} className="flex items-start gap-2 bg-red-50 p-3 rounded-lg">
+                    <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
+                    <span className="flex-1 text-sm text-red-900">{blocker.text}</span>
+                    <button
+                      onClick={() => removeBlocker(selectedDept.id, blocker.id)}
+                      className="text-red-600 hover:text-red-700 text-sm"
+                    >
+                      Resolve
+                    </button>
+                  </div>
+                ))}
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Add new blocker..."
+                    className="flex-1 px-3 py-2 border rounded-lg"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        addBlocker(selectedDept.id, e.target.value);
+                        e.target.value = '';
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
 
-                  // Blockers
-                  React.createElement('div', { className: "mb-6" },
-                    React.createElement('h3', { className: "text-lg font-semibold text-gray-900 mb-4" }, 'Blockers & Escalations'),
-                    React.createElement('div', { className: "space-y-2" },
-                      selectedDept.blockers.map((blocker) =>
-                        React.createElement('div', { key: blocker.id, className: "flex items-start gap-2 bg-red-50 p-3 rounded-lg" },
-                          React.createElement(AlertCircle, { className: "w-5 h-5 text-red-600 mt-0.5" }),
-                          React.createElement('span', { className: "flex-1 text-sm text-red-900" }, blocker.text),
-                          React.createElement('button', {
-                            onClick: () => removeBlocker(selectedDept.id, blocker.id),
-                            className: "text-red-600 hover:text-red-700 text-sm"
-                          }, 'Resolve')
-                        )
-                      ),
-                      React.createElement('div', { className: "flex gap-2" },
-                        React.createElement('input', {
-                          type: "text",
-                          placeholder: "Add new blocker...",
-                          className: "flex-1 px-3 py-2 border rounded-lg",
-                          onKeyPress: (e) => {
-                            if (e.key === 'Enter') {
-                              addBlocker(selectedDept.id, e.target.value);
-                              e.target.value = '';
-                            }
+            {/* Manager Performance */}
+            <div className="bg-blue-50 rounded-lg p-4 mb-6">
+              <h3 className="font-semibold text-blue-900 mb-3">Manager Performance</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {Object.entries(calculateManagerPerformance(selectedDept)).map(([key, value]) => (
+                  <div key={key}>
+                    <p className="text-xs text-blue-700 capitalize">
+                      {key.replace(/([A-Z])/g, ' $1').trim()}
+                    </p>
+                    <p className="font-semibold text-blue-900">{value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <button
+              onClick={() => setSelectedDept(null)}
+              className="text-blue-600 hover:text-blue-700 font-medium"
+            >
+              ← Back to Overview
+            </button>
+
+            {/* Project Modal */}
+            {showProjectModal && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg p-6 w-96">
+                  <h3 className="text-lg font-semibold mb-4">Add New Project</h3>
+                  <input
+                    type="text"
+                    placeholder="Project Name"
+                    value={newProject.name}
+                    onChange={(e) => setNewProject({...newProject, name: e.target.value})}
+                    className="w-full px-3 py-2 border rounded-lg mb-3"
+                  />
+                  <input
+                    type="date"
+                    placeholder="Deadline"
+                    value={newProject.deadline}
+                    onChange={(e) => setNewProject({...newProject, deadline: e.target.value})}
+                    className="w-full px-3 py-2 border rounded-lg mb-3"
+                  />
+                  <select
+                    value={newProject.status}
+                    onChange={(e) => setNewProject({...newProject, status: e.target.value})}
+                    className="w-full px-3 py-2 border rounded-lg mb-3"
+                  >
+                    <option value="green">🟢 On Track</option>
+                    <option value="yellow">🟡 At Risk</option>
+                    <option value="red">🔴 Off Track</option>
+                  </select>
+                  <input
+                    type="number"
+                    placeholder="Completion %"
+                    value={newProject.completion}
+                    onChange={(e) => setNewProject({...newProject, completion: parseInt(e.target.value)})}
+                    className="w-full px-3 py-2 border rounded-lg mb-4"
+                    min="0"
+                    max="100"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => addProject(selectedDept.id)}
+                      className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium"
+                    >
+                      Add Project
+                    </button>
+                    <button
+                      onClick={() => setShowProjectModal(false)}
+                      className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Weekly Updates Mode */}
+        {viewMode === 'updates' && (
+          <div className="space-y-4">
+            {departments.map(dept => (
+              <div key={dept.id} className="bg-white rounded-lg shadow-sm p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900">{dept.name}</h3>
+                    <p className="text-sm text-gray-600">{dept.manager} • {dept.weeklyUpdate.date}</p>
+                  </div>
+                  <span className={`px-3 py-1 rounded-full font-medium ${getStatusColor(dept.status)}`}>
+                    {dept.status.toUpperCase()}
+                  </span>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-medium text-green-700 mb-1">✅ Wins This Week</h4>
+                    <textarea
+                      value={dept.weeklyUpdate.wins}
+                      onChange={(e) => updateWeeklyUpdate(dept.id, 'wins', e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg text-gray-700"
+                      rows="2"
+                      placeholder="Enter this week's wins..."
+                    />
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium text-yellow-700 mb-1">⚠️ Challenges</h4>
+                    <textarea
+                      value={dept.weeklyUpdate.challenges}
+                      onChange={(e) => updateWeeklyUpdate(dept.id, 'challenges', e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg text-gray-700"
+                      rows="2"
+                      placeholder="Enter challenges faced..."
+                    />
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium text-blue-700 mb-1">➡️ Next Week Focus</h4>
+                    <textarea
+                      value={dept.weeklyUpdate.nextWeek}
+                      onChange={(e) => updateWeeklyUpdate(dept.id, 'nextWeek', e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg text-gray-700"
+                      rows="2"
+                      placeholder="Enter next week's focus areas..."
+                    />
+                  </div>
+
+                  {dept.blockers.length > 0 && (
+                    <div className="bg-red-50 rounded-lg p-3">
+                      <h4 className="font-medium text-red-900 mb-2">🚨 Active Blockers ({dept.blockers.length})</h4>
+                      {dept.blockers.map((blocker) => (
+                        <p key={blocker.id} className="text-sm text-red-800">• {blocker.text}</p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Monthly Snapshot Mode */}
+        {viewMode === 'monthly' && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Monthly Snapshot</h2>
+                <input
+                  type="month"
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(e.target.value)}
+                  className="px-4 py-2 border rounded-lg"
+                />
+              </div>
+
+              {/* Monthly Overview Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {getMonthlySnapshot().map(dept => (
+                  <div key={dept.id} className="border rounded-lg p-4">
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <h3 className="font-semibold text-gray-900">{dept.name}</h3>
+                        <p className="text-sm text-gray-600">{dept.manager}</p>
+                      </div>
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(dept.status)}`}>
+                        {dept.status.toUpperCase()}
+                      </span>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Updates Posted</span>
+                        <span className="font-semibold">{dept.monthlyStats.updates}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Projects</span>
+                        <span className="font-semibold">
+                          {dept.monthlyStats.projectsCompleted}/{dept.monthlyStats.projectsTotal}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Avg Completion</span>
+                        <div className="flex items-center gap-1">
+                          {dept.monthlyStats.avgCompletion > 70 ? 
+                            <TrendingUp className="w-4 h-4 text-green-600" /> :
+                            dept.monthlyStats.avgCompletion > 40 ?
+                            <Minus className="w-4 h-4 text-yellow-600" /> :
+                            <TrendingDown className="w-4 h-4 text-red-600" />
                           }
-                        })
-                      )
-                    )
-                  ),
+                          <span className="font-semibold">{dept.monthlyStats.avgCompletion}%</span>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Active Blockers</span>
+                        <span className={`font-semibold ${dept.monthlyStats.blockerCount > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                          {dept.monthlyStats.blockerCount}
+                        </span>
+                      </div>
+                    </div>
 
-                  // Manager Performance
-                  React.createElement('div', { className: "bg-blue-50 rounded-lg p-4 mb-6" },
-                    React.createElement('h3', { className: "font-semibold text-blue-900 mb-3" }, 'Manager Performance'),
-                    React.createElement('div', { className: "grid grid-cols-2 md:grid-cols-4 gap-3" },
-                      Object.entries(calculateManagerPerformance(selectedDept)).map(([key, value]) =>
-                        React.createElement('div', { key },
-                          React.createElement('p', { className: "text-xs text-blue-700 capitalize" },
-                            key.replace(/([A-Z])/g, ' $1').trim()
-                          ),
-                          React.createElement('p', { className: "font-semibold text-blue-900" }, value)
-                        )
-                      )
-                    )
-                  ),
+                    {/* Performance Badge */}
+                    <div className="mt-3 pt-3 border-t">
+                      {dept.monthlyStats.avgCompletion > 70 && dept.monthlyStats.blockerCount === 0 ? (
+                        <div className="flex items-center gap-1 text-green-600">
+                          <Award className="w-4 h-4" />
+                          <span className="text-xs font-medium">High Performer</span>
+                        </div>
+                      ) : dept.monthlyStats.updates < 2 ? (
+                        <div className="flex items-center gap-1 text-yellow-600">
+                          <AlertTriangle className="w-4 h-4" />
+                          <span className="text-xs font-medium">Needs More Updates</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1 text-blue-600">
+                          <Activity className="w-4 h-4" />
+                          <span className="text-xs font-medium">On Track</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
 
-                  React.createElement('button', {
-                    onClick: () => setSelectedDept(null),
-                    className: "text-blue-600 hover:text-blue-700 font-medium"
-                  }, '← Back to Overview'),
+              {/* Monthly Summary Stats */}
+              <div className="mt-6 pt-6 border-t">
+                <h3 className="text-lg font-semibold mb-4">Overall Performance</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-sm text-gray-600">Total Updates</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {getMonthlySnapshot().reduce((sum, d) => sum + d.monthlyStats.updates, 0)}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-sm text-gray-600">Projects Completed</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {getMonthlySnapshot().reduce((sum, d) => sum + d.monthlyStats.projectsCompleted, 0)}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-sm text-gray-600">Avg Completion Rate</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {Math.round(
+                        getMonthlySnapshot().reduce((sum, d) => sum + d.monthlyStats.avgCompletion, 0) / 
+                        departments.length
+                      )}%
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-sm text-gray-600">Total Blockers</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {getMonthlySnapshot().reduce((sum, d) => sum + d.monthlyStats.blockerCount, 0)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
-                  // Project Modal
-                  showProjectModal && React.createElement('div', { className: "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" },
-                    React.createElement('div', { className: "bg-white rounded-lg p-6 w-96" },
-                      React.createElement('h3', { className: "text-lg font-semibold mb-4" }, 'Add New Project'),
-                      React.createElement('input', {
-                        type: "text",
-                        placeholder: "Project Name",
-                        value: newProject.name,
-                        onChange: (e) => setNewProject({...newProject, name: e.target.value}),
-                        className: "w-full px-3 py-2 border rounded-lg mb-3"
-                      }),
-                      React.createElement('input', {
-                        type: "date",
-                        placeholder: "Deadline",
-                        value: newProject.deadline,
-                        onChange: (e) => setNewProject({...newProject, deadline: e.target.value}),
-                        className: "w-full px-3 py-2 border rounded-lg mb-3"
-                      }),
-                      React.createElement('select', {
-                        value: newProject.status,
-                        onChange: (e) => setNewProject({...newProject, status: e.target.value}),
-                        className: "w-full px-3 py-2 border rounded-lg mb-3"
-                      },
-                        React.createElement('option', { value: "green" }, '🟢 On Track'),
-                        React.createElement('option', { value: "yellow" }, '🟡 At Risk'),
-                        React.createElement('option', { value: "red" }, '🔴 Off Track')
-                      ),
-                      React.createElement('input', {
-                        type: "number",
-                        placeholder: "Completion %",
-                        value: newProject.completion,
-                        onChange: (e) => setNewProject({...newProject, completion: parseInt(e.target.value)}),
-                        className: "w-full px-3 py-2 border rounded-lg mb-4",
-                        min: "0",
-                        max: "100"
-                      }),
-                      React.createElement('div', { className: "flex gap-2" },
-                        React.createElement('button', {
-                          onClick: () => addProject(selectedDept.id),
-                          className: "flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium"
-                        }, 'Add Project'),
-                        React.createElement('button', {
-                          onClick: () => setShowProjectModal(false),
-                          className: "flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium"
-                        }, 'Cancel')
-                      )
-                    )
-                  )
-                ),
+        {/* Quick Data Export */}
+        <div className="mt-6 text-center">
+          <button
+            onClick={() => {
+              const dataStr = JSON.stringify(departments, null, 2);
+              const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+              const exportFileDefaultName = `ceo-dashboard-${new Date().toISOString().split('T')[0]}.json`;
+              const linkElement = document.createElement('a');
+              linkElement.setAttribute('href', dataUri);
+              linkElement.setAttribute('download', exportFileDefaultName);
+              linkElement.click();
+            }}
+            className="text-sm text-gray-500 hover:text-gray-700"
+          >
+            Export Data (JSON)
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
-                // Weekly Updates Mode
-                viewMode === 'updates' && React.createElement('div', { className: "space-y-4" },
-                  departments.map(dept =>
-                    React.createElement('div', { key: dept.id, className: "bg-white rounded-lg shadow-sm p-6" },
-                      React.createElement('div', { className: "flex justify-between items-start mb-4" },
-                        React.createElement('div', null,
-                          React.createElement('h3', { className: "text-xl font-semibold text-gray-900" }, dept.name),
-                          React.createElement('p', { className: "text-sm text-gray-600" }, `${dept.manager} • ${dept.weeklyUpdate.date}`)
-                        ),
-                        React.createElement('span', { className: `px-3 py-1 rounded-full font-medium ${getStatusColor(dept.status)}` },
-                          dept.status.toUpperCase()
-                        )
-                      ),
-
-                      React.createElement('div', { className: "space-y-4" },
-                        React.createElement('div', null,
-                          React.createElement('h4', { className: "font-medium text-green-700 mb-1" }, '✅ Wins This Week'),
-                          React.createElement('textarea', {
-                            value: dept.weeklyUpdate.wins,
-                            onChange: (e) => updateWeeklyUpdate(dept.id, 'wins', e.target.value),
-                            className: "w-full px-3 py-2 border rounded-lg text-gray-700",
-                            rows: "2",
-                            placeholder: "Enter this week's wins..."
-                          })
-                        ),
-
-                        React.createElement('div', null,
-                          React.createElement('h4', { className: "font-medium text-yellow-700 mb-1" }, '⚠️ Challenges'),
-                          React.createElement('textarea', {
-                            value: dept.weeklyUpdate.challenges,
-                            onChange: (e) => updateWeeklyUpdate(dept.id, 'challenges', e.target.value),
-                            className: "w-full px-3 py-2 border rounded-lg text-gray-700",
-                            rows: "2",
-                            placeholder: "Enter challenges faced..."
-                          })
-                        ),
-
-                        React.createElement('div', null,
-                          React.createElement('h4', { className: "font-medium text-blue-700 mb-1" }, '➡️ Next Week Focus'),
-                          React.createElement('textarea', {
-                            value: dept.weeklyUpdate.nextWeek,
-                            onChange: (e) => updateWeeklyUpdate(dept.id, 'nextWeek', e.target.value),
-                            className: "w-full px-3 py-2 border rounded-lg text-gray-700",
-                            rows: "2",
-                            placeholder: "Enter next week's focus areas..."
-                          })
-                        ),
-
-                        dept.blockers.length > 0 && React.createElement('div', { className: "bg-red-50 rounded-lg p-3" },
-                          React.createElement('h4', { className: "font-medium text-red-900 mb-2" }, `🚨 Active Blockers (${dept.blockers.length})`),
-                          dept.blockers.map((blocker) =>
-                            React.createElement('p', { key: blocker.id, className: "text-sm text-red-800" }, `• ${blocker.text}`)
-                          )
-                        )
-                      )
-                    )
-                  )
-                ),
-
-                // Monthly Snapshot Mode
-                viewMode === 'monthly' && React.createElement('div', { className: "space-y-6" },
-                  React.createElement('div', { className: "bg-white rounded-lg shadow-sm p-6" },
-                    React.createElement('div', { className: "flex justify-between items-center mb-6" },
-                      React.createElement('h2', { className: "text-2xl font-bold text-gray-900" }, 'Monthly Snapshot'),
-                      React.createElement('input', {
-                        type: "month",
-                        value: selectedMonth,
-                        onChange: (e) => setSelectedMonth(e.target.value),
-                        className: "px-4 py-2 border rounded-lg"
-                      })
-                    ),
-
-                    React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" },
-                      getMonthlySnapshot().map(dept =>
-                        React.createElement('div', { key: dept.id, className: "border rounded-lg p-4" },
-                          React.createElement('div', { className: "flex justify-between items-start mb-3" },
-                            React.createElement('div', null,
-                              React.createElement('h3', { className: "font-semibold text-gray-900" }, dept.name),
-                              React.createElement('p', { className: "text-sm text-gray-600" }, dept.manager)
-                            ),
-                            React.createElement('span', { className: `px-2 py-1 rounded text-xs font-medium ${getStatusColor(dept.status)}` },
-                              dept.status.toUpperCase()
-                            )
-                          ),
-
-                          React.createElement('div', { className: "space-y-2" },
-                            React.createElement('div', { className: "flex justify-between items-center" },
-                              React.createElement('span', { className: "text-sm text-gray-600" }, 'Updates Posted'),
-                              React.createElement('span', { className: "font-semibold" }, dept.monthlyStats.updates)
-                            ),
-                            React.createElement('div', { className: "flex justify-between items-center" },
-                              React.createElement('span', { className: "text-sm text-gray-600" }, 'Projects'),
-                              React.createElement('span', { className: "font-semibold" },
-                                `${dept.monthlyStats.projectsCompleted}/${dept.monthlyStats.projectsTotal}`
-                              )
-                            ),
-                            React.createElement('div', { className: "flex justify-between items-center" },
-                              React.createElement('span', { className: "text-sm text-gray-600" }, 'Avg Completion'),
-                              React.createElement('div', { className: "flex items-center gap-1" },
-                                dept.monthlyStats.avgCompletion > 70 ? 
-                                  React.createElement(TrendingUpIcon) :
-                                  dept.monthlyStats.avgCompletion > 40 ?
-                                  React.createElement(MinusIcon) :
-                                  React.createElement(TrendingDownIcon),
-                                React.createElement('span', { className: "font-semibold" }, `${dept.monthlyStats.avgCompletion}%`)
-                              )
-                            ),
-                            React.createElement('div', { className: "flex justify-between items-center" },
-                              React.createElement('span', { className: "text-sm text-gray-600" }, 'Active Blockers'),
-                              React.createElement('span', { 
-                                className: `font-semibold ${dept.monthlyStats.blockerCount > 0 ? 'text-red-600' : 'text-green-600'}` 
-                              }, dept.monthlyStats.blockerCount)
-                            )
-                          ),
-
-                          React.createElement('div', { className: "mt-3 pt-3 border-t" },
-                            dept.monthlyStats.avgCompletion > 70 && dept.monthlyStats.blockerCount === 0 ?
-                              React.createElement('div', { className: "flex items-center gap-1 text-green-600" },
-                                React.createElement(AwardIcon),
-                                React.createElement('span', { className: "text-xs font-medium" }, 'High Performer')
-                              ) : dept.monthlyStats.updates < 2 ?
-                              React.createElement('div', { className: "flex items-center gap-1 text-yellow-600" },
-                                React.createElement(AlertTriangle, { className: "w-4 h-4" }),
-                                React.createElement('span', { className: "text-xs font-medium" }, 'Needs More Updates')
-                              ) :
-                              React.createElement('div', { className: "flex items-center gap-1 text-blue-600" },
-                                React.createElement(ActivityIcon),
-                                React.createElement('span', { className: "text-xs font-medium" }, 'On Track')
-                              )
-                          )
-                        )
-                      )
-                    ),
-
-                    React.createElement('div', { className: "mt-6 pt-6 border-t" },
-                      React.createElement('h3', { className: "text-lg font-semibold mb-4" }, 'Overall Performance'),
-                      React.createElement('div', { className: "grid grid-cols-2 md:grid-cols-4 gap-4" },
-                        React.createElement('div', { className: "bg-gray-50 rounded-lg p-4" },
-                          React.createElement('p', { className: "text-sm text-gray-600" }, 'Total Updates'),
-                          React.createElement('p', { className: "text-2xl font-bold text-gray-900" },
-                            getMonthlySnapshot().reduce((sum, d) => sum + d.monthlyStats.updates, 0)
-                          )
-                        ),
-                        React.createElement('div', { className: "bg-gray-50 rounded-lg p-4" },
-                          React.createElement('p', { className: "text-sm text-gray-600" }, 'Projects Completed'),
-                          React.createElement('p', { className: "text-2xl font-bold text-gray-900" },
-                            getMonthlySnapshot().reduce((sum, d) => sum + d.monthlyStats.projectsCompleted, 0)
-                          )
-                        ),
-                        React.createElement('div', { className: "bg-gray-50 rounded-lg p-4" },
-                          React.createElement('p', { className: "text-sm text-gray-600" }, 'Avg Completion Rate'),
-                          React.createElement('p', { className: "text-2xl font-bold text-gray-900" },
-                            `${Math.round(
-                              getMonthlySnapshot().reduce((sum, d) => sum + d.monthlyStats.avgCompletion, 0) / 
-                              departments.length
-                            )}%`
-                          )
-                        ),
-                        React.createElement('div', { className: "bg-gray-50 rounded-lg p-4" },
-                          React.createElement('p', { className: "text-sm text-gray-600" }, 'Total Blockers'),
-                          React.createElement('p', { className: "text-2xl font-bold text-gray-900" },
-                            getMonthlySnapshot().reduce((sum, d) => sum + d.monthlyStats.blockerCount, 0)
-                          )
-                        )
-                      )
-                    )
-                  )
-                ),
-
-                // Export button
-                React.createElement('div', { className: "mt-6 text-center" },
-                  React.createElement('button', {
-                    onClick: () => {
-                      const dataStr = JSON.stringify(departments, null, 2);
-                      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-                      const exportFileDefaultName = `ceo-dashboard-${new Date().toISOString().split('T')[0]}.json`;
-                      const linkElement = document.createElement('a');
-                      linkElement.setAttribute('href', dataUri);
-                      linkElement.setAttribute('download', exportFileDefaultName);
-                      linkElement.click();
-                    },
-                    className: "text-sm text-gray-500 hover:text-gray-700"
-                  }, 'Export Data (JSON)')
-                )
-              )
-            )
-          );
-        };
-
-        // Render the app
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(React.createElement(CEODashboard));
-    </script>
-</body>
-</html>
+export default CEODashboard;
