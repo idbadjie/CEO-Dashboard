@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, ChevronRight, AlertCircle, CheckCircle, Clock, TrendingUp, Users, Target, AlertTriangle, Calendar, FileText, BarChart3, Plus, X, Edit2, Save, TrendingDown, Minus, Activity, Award } from 'lucide-react';
+import {
+  ChevronDown, ChevronRight, AlertCircle, CheckCircle, Clock, TrendingUp,
+  Users, Target, AlertTriangle, Calendar, FileText, BarChart3, Plus, X,
+  Edit2, Save, TrendingDown, Minus, Activity, Award
+} from 'lucide-react';
 
 const CEODashboard = () => {
   // Initialize departments with your team structure
@@ -9,246 +13,121 @@ const CEODashboard = () => {
       name: 'Operations',
       manager: 'Jagan',
       status: 'green',
-      keyMetrics: {
-        efficiency: 0,
-        tasksCompleted: 0,
-        onTimeDelivery: 0,
-        qualityScore: 0
-      },
+      keyMetrics: { efficiency: 0, tasksCompleted: 0, onTimeDelivery: 0, qualityScore: 0 },
       projects: [],
       blockers: [],
-      weeklyUpdate: {
-        wins: '',
-        challenges: '',
-        nextWeek: '',
-        date: new Date().toISOString().split('T')[0]
-      },
-      monthlyMetrics: {
-        updateFrequency: 0,
-        responseTime: 0,
-        projectCompletion: 0
-      }
+      weeklyUpdate: { wins: '', challenges: '', nextWeek: '', date: new Date().toISOString().split('T')[0] },
+      monthlyMetrics: { updateFrequency: 0, responseTime: 0, projectCompletion: 0 }
     },
     {
       id: 'clinical',
       name: 'Clinical Operations',
       manager: 'Betty',
       status: 'green',
-      keyMetrics: {
-        patientSatisfaction: 0,
-        clinicalAccuracy: 0,
-        processCompliance: 0,
-        turnaroundTime: 0
-      },
+      keyMetrics: { patientSatisfaction: 0, clinicalAccuracy: 0, processCompliance: 0, turnaroundTime: 0 },
       projects: [],
       blockers: [],
-      weeklyUpdate: {
-        wins: '',
-        challenges: '',
-        nextWeek: '',
-        date: new Date().toISOString().split('T')[0]
-      },
-      monthlyMetrics: {
-        updateFrequency: 0,
-        responseTime: 0,
-        projectCompletion: 0
-      }
+      weeklyUpdate: { wins: '', challenges: '', nextWeek: '', date: new Date().toISOString().split('T')[0] },
+      monthlyMetrics: { updateFrequency: 0, responseTime: 0, projectCompletion: 0 }
     },
     {
       id: 'globalfund',
       name: 'Global Fund',
       manager: 'Nafi',
       status: 'green',
-      keyMetrics: {
-        fundingSecured: 0,
-        proposalsSubmitted: 0,
-        complianceScore: 0,
-        reportingTimeliness: 0
-      },
+      keyMetrics: { fundingSecured: 0, proposalsSubmitted: 0, complianceScore: 0, reportingTimeliness: 0 },
       projects: [],
       blockers: [],
-      weeklyUpdate: {
-        wins: '',
-        challenges: '',
-        nextWeek: '',
-        date: new Date().toISOString().split('T')[0]
-      },
-      monthlyMetrics: {
-        updateFrequency: 0,
-        responseTime: 0,
-        projectCompletion: 0
-      }
+      weeklyUpdate: { wins: '', challenges: '', nextWeek: '', date: new Date().toISOString().split('T')[0] },
+      monthlyMetrics: { updateFrequency: 0, responseTime: 0, projectCompletion: 0 }
     },
     {
       id: 'retail',
       name: 'Retail',
       manager: 'Mabinta',
       status: 'green',
-      keyMetrics: {
-        salesGrowth: 0,
-        inventoryTurnover: 0,
-        customerSatisfaction: 0,
-        storePerformance: 0
-      },
+      keyMetrics: { salesGrowth: 0, inventoryTurnover: 0, customerSatisfaction: 0, storePerformance: 0 },
       projects: [],
       blockers: [],
-      weeklyUpdate: {
-        wins: '',
-        challenges: '',
-        nextWeek: '',
-        date: new Date().toISOString().split('T')[0]
-      },
-      monthlyMetrics: {
-        updateFrequency: 0,
-        responseTime: 0,
-        projectCompletion: 0
-      }
+      weeklyUpdate: { wins: '', challenges: '', nextWeek: '', date: new Date().toISOString().split('T')[0] },
+      monthlyMetrics: { updateFrequency: 0, responseTime: 0, projectCompletion: 0 }
     },
     {
       id: 'subscription',
       name: 'Subscription',
       manager: 'Lena',
       status: 'green',
-      keyMetrics: {
-        monthlyRecurringRevenue: 0,
-        churnRate: 0,
-        customerAcquisition: 0,
-        retentionRate: 0
-      },
+      keyMetrics: { monthlyRecurringRevenue: 0, churnRate: 0, customerAcquisition: 0, retentionRate: 0 },
       projects: [],
       blockers: [],
-      weeklyUpdate: {
-        wins: '',
-        challenges: '',
-        nextWeek: '',
-        date: new Date().toISOString().split('T')[0]
-      },
-      monthlyMetrics: {
-        updateFrequency: 0,
-        responseTime: 0,
-        projectCompletion: 0
-      }
+      weeklyUpdate: { wins: '', challenges: '', nextWeek: '', date: new Date().toISOString().split('T')[0] },
+      monthlyMetrics: { updateFrequency: 0, responseTime: 0, projectCompletion: 0 }
     },
     {
       id: 'finance',
       name: 'Finance',
       manager: 'Yusupha',
       status: 'green',
-      keyMetrics: {
-        budgetVariance: 0,
-        cashFlow: 0,
-        accountsReceivable: 0,
-        costReduction: 0
-      },
+      keyMetrics: { budgetVariance: 0, cashFlow: 0, accountsReceivable: 0, costReduction: 0 },
       projects: [],
       blockers: [],
-      weeklyUpdate: {
-        wins: '',
-        challenges: '',
-        nextWeek: '',
-        date: new Date().toISOString().split('T')[0]
-      },
-      monthlyMetrics: {
-        updateFrequency: 0,
-        responseTime: 0,
-        projectCompletion: 0
-      }
+      weeklyUpdate: { wins: '', challenges: '', nextWeek: '', date: new Date().toISOString().split('T')[0] },
+      monthlyMetrics: { updateFrequency: 0, responseTime: 0, projectCompletion: 0 }
     },
     {
       id: 'srops',
       name: 'Senior Operations',
       manager: 'Vic',
       status: 'green',
-      keyMetrics: {
-        strategicGoals: 0,
-        crossTeamCollaboration: 0,
-        processOptimization: 0,
-        leadershipScore: 0
-      },
+      keyMetrics: { strategicGoals: 0, crossTeamCollaboration: 0, processOptimization: 0, leadershipScore: 0 },
       projects: [],
       blockers: [],
-      weeklyUpdate: {
-        wins: '',
-        challenges: '',
-        nextWeek: '',
-        date: new Date().toISOString().split('T')[0]
-      },
-      monthlyMetrics: {
-        updateFrequency: 0,
-        responseTime: 0,
-        projectCompletion: 0
-      }
+      weeklyUpdate: { wins: '', challenges: '', nextWeek: '', date: new Date().toISOString().split('T')[0] },
+      monthlyMetrics: { updateFrequency: 0, responseTime: 0, projectCompletion: 0 }
     },
     {
       id: 'technology',
       name: 'Technology',
       manager: 'Kendesoft',
       status: 'green',
-      keyMetrics: {
-        systemUptime: 0,
-        bugResolution: 0,
-        projectDelivery: 0,
-        innovationIndex: 0
-      },
+      keyMetrics: { systemUptime: 0, bugResolution: 0, projectDelivery: 0, innovationIndex: 0 },
       projects: [],
       blockers: [],
-      weeklyUpdate: {
-        wins: '',
-        challenges: '',
-        nextWeek: '',
-        date: new Date().toISOString().split('T')[0]
-      },
-      monthlyMetrics: {
-        updateFrequency: 0,
-        responseTime: 0,
-        projectCompletion: 0
-      }
+      weeklyUpdate: { wins: '', challenges: '', nextWeek: '', date: new Date().toISOString().split('T')[0] },
+      monthlyMetrics: { updateFrequency: 0, responseTime: 0, projectCompletion: 0 }
     },
     {
       id: 'logistics',
       name: 'Logistics',
       manager: 'Modou',
       status: 'green',
-      keyMetrics: {
-        deliveryAccuracy: 0,
-        warehouseEfficiency: 0,
-        transportCost: 0,
-        orderFulfillment: 0
-      },
+      keyMetrics: { deliveryAccuracy: 0, warehouseEfficiency: 0, transportCost: 0, orderFulfillment: 0 },
       projects: [],
       blockers: [],
-      weeklyUpdate: {
-        wins: '',
-        challenges: '',
-        nextWeek: '',
-        date: new Date().toISOString().split('T')[0]
-      },
-      monthlyMetrics: {
-        updateFrequency: 0,
-        responseTime: 0,
-        projectCompletion: 0
-      }
+      weeklyUpdate: { wins: '', challenges: '', nextWeek: '', date: new Date().toISOString().split('T')[0] },
+      monthlyMetrics: { updateFrequency: 0, responseTime: 0, projectCompletion: 0 }
     }
   ];
 
   // State management
   const [departments, setDepartments] = useState(() => {
+    if (typeof window === 'undefined') return initialDepartments;
     const saved = localStorage.getItem('ceoDashboardData');
     return saved ? JSON.parse(saved) : initialDepartments;
   });
-  
   const [selectedDept, setSelectedDept] = useState(null);
   const [viewMode, setViewMode] = useState('overview');
   const [editMode, setEditMode] = useState(false);
   const [newProject, setNewProject] = useState({ name: '', deadline: '', status: 'green', completion: 0 });
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [updateHistory, setUpdateHistory] = useState(() => {
+    if (typeof window === 'undefined') return [];
     const saved = localStorage.getItem('updateHistory');
     return saved ? JSON.parse(saved) : [];
   });
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
 
-  // Save to localStorage whenever data changes
+  // Persist to localStorage
   useEffect(() => {
     localStorage.setItem('ceoDashboardData', JSON.stringify(departments));
   }, [departments]);
@@ -265,20 +144,20 @@ const CEODashboard = () => {
       const updateDate = new Date(u.date);
       return (now - updateDate) / (1000 * 60 * 60 * 24) <= 30;
     });
-    
+
     return {
       updateFrequency: lastMonth.length,
       avgResponseTime: dept.blockers.length > 0 ? '2 days' : 'N/A',
-      completionRate: dept.projects.length > 0 
-        ? Math.round(dept.projects.reduce((sum, p) => sum + p.completion, 0) / dept.projects.length)
+      completionRate: dept.projects.length > 0
+        ? Math.round(dept.projects.reduce((sum, p) => sum + (p.completion || 0), 0) / dept.projects.length)
         : 0,
       communicationScore: (dept.weeklyUpdate.wins || dept.weeklyUpdate.challenges) ? 'Good' : 'Needs Improvement'
     };
   };
 
-  // Utility functions
+  // Utilities
   const getStatusColor = (status) => {
-    switch(status) {
+    switch (status) {
       case 'green': return 'text-green-600 bg-green-100';
       case 'yellow': return 'text-yellow-600 bg-yellow-100';
       case 'red': return 'text-red-600 bg-red-100';
@@ -287,7 +166,7 @@ const CEODashboard = () => {
   };
 
   const getStatusIcon = (status) => {
-    switch(status) {
+    switch (status) {
       case 'green': return <CheckCircle className="w-5 h-5" />;
       case 'yellow': return <AlertTriangle className="w-5 h-5" />;
       case 'red': return <AlertCircle className="w-5 h-5" />;
@@ -297,24 +176,24 @@ const CEODashboard = () => {
 
   // Update functions
   const updateDepartmentStatus = (deptId, newStatus) => {
-    setDepartments(prev => prev.map(dept => 
+    setDepartments(prev => prev.map(dept =>
       dept.id === deptId ? { ...dept, status: newStatus } : dept
     ));
   };
 
   const updateWeeklyUpdate = (deptId, field, value) => {
-    const updatedDepts = departments.map(dept => 
-      dept.id === deptId ? { 
-        ...dept, 
-        weeklyUpdate: { 
-          ...dept.weeklyUpdate, 
+    const updatedDepts = departments.map(dept =>
+      dept.id === deptId ? {
+        ...dept,
+        weeklyUpdate: {
+          ...dept.weeklyUpdate,
           [field]: value,
           date: new Date().toISOString().split('T')[0]
         }
       } : dept
     );
     setDepartments(updatedDepts);
-    
+
     // Add to history
     const historyEntry = {
       deptId,
@@ -327,44 +206,45 @@ const CEODashboard = () => {
   };
 
   const updateMetric = (deptId, metric, value) => {
-    setDepartments(prev => prev.map(dept => 
-      dept.id === deptId ? { 
-        ...dept, 
-        keyMetrics: { 
-          ...dept.keyMetrics, 
-          [metric]: value 
+    const numeric = Number.isNaN(parseFloat(value)) ? 0 : parseFloat(value);
+    setDepartments(prev => prev.map(dept =>
+      dept.id === deptId ? {
+        ...dept,
+        keyMetrics: {
+          ...dept.keyMetrics,
+          [metric]: numeric
         }
       } : dept
     ));
   };
 
   const addProject = (deptId) => {
-    if (!newProject.name) return;
-    
-    setDepartments(prev => prev.map(dept => 
-      dept.id === deptId ? { 
-        ...dept, 
+    if (!newProject.name.trim()) return;
+
+    setDepartments(prev => prev.map(dept =>
+      dept.id === deptId ? {
+        ...dept,
         projects: [...dept.projects, { ...newProject, id: Date.now() }]
       } : dept
     ));
-    
+
     setNewProject({ name: '', deadline: '', status: 'green', completion: 0 });
     setShowProjectModal(false);
   };
 
   const updateProject = (deptId, projectId, field, value) => {
-    setDepartments(prev => prev.map(dept => 
+    setDepartments(prev => prev.map(dept =>
       dept.id === deptId ? {
         ...dept,
-        projects: dept.projects.map(p => 
-          p.id === projectId ? { ...p, [field]: value } : p
+        projects: dept.projects.map(p =>
+          p.id === projectId ? { ...p, [field]: field === 'completion' ? Math.min(100, Math.max(0, parseInt(value || 0, 10))) : value } : p
         )
       } : dept
     ));
   };
 
   const deleteProject = (deptId, projectId) => {
-    setDepartments(prev => prev.map(dept => 
+    setDepartments(prev => prev.map(dept =>
       dept.id === deptId ? {
         ...dept,
         projects: dept.projects.filter(p => p.id !== projectId)
@@ -374,50 +254,45 @@ const CEODashboard = () => {
 
   const addBlocker = (deptId, blocker) => {
     if (!blocker.trim()) return;
-    
-    setDepartments(prev => prev.map(dept => 
-      dept.id === deptId ? { 
-        ...dept, 
+
+    setDepartments(prev => prev.map(dept =>
+      dept.id === deptId ? {
+        ...dept,
         blockers: [...dept.blockers, { id: Date.now(), text: blocker, date: new Date().toISOString() }]
       } : dept
     ));
   };
 
   const removeBlocker = (deptId, blockerId) => {
-    setDepartments(prev => prev.map(dept => 
-      dept.id === deptId ? { 
-        ...dept, 
+    setDepartments(prev => prev.map(dept =>
+      dept.id === deptId ? {
+        ...dept,
         blockers: dept.blockers.filter(b => b.id !== blockerId)
       } : dept
     ));
   };
 
-  // Generate monthly snapshot
+  // Monthly snapshot
   const getMonthlySnapshot = () => {
-    const monthData = updateHistory.filter(h => 
-      h.date.startsWith(selectedMonth)
-    );
-    
-    const deptPerformance = departments.map(dept => {
+    const monthData = updateHistory.filter(h => h.date.startsWith(selectedMonth));
+    return departments.map(dept => {
       const deptUpdates = monthData.filter(u => u.deptId === dept.id);
-      const completedProjects = dept.projects.filter(p => p.completion === 100).length;
+      const completedProjects = dept.projects.filter(p => (p.completion || 0) === 100).length;
       const totalProjects = dept.projects.length;
-      
+
       return {
         ...dept,
         monthlyStats: {
           updates: deptUpdates.length,
           projectsCompleted: completedProjects,
           projectsTotal: totalProjects,
-          avgCompletion: totalProjects > 0 
-            ? Math.round(dept.projects.reduce((sum, p) => sum + p.completion, 0) / totalProjects)
+          avgCompletion: totalProjects > 0
+            ? Math.round(dept.projects.reduce((sum, p) => sum + (p.completion || 0), 0) / totalProjects)
             : 0,
           blockerCount: dept.blockers.length
         }
       };
     });
-    
-    return deptPerformance;
   };
 
   return (
@@ -444,6 +319,8 @@ const CEODashboard = () => {
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                   viewMode === 'details' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
+                disabled={!selectedDept}
+                title={!selectedDept ? 'Select a department from Overview' : undefined}
               >
                 Details
               </button>
@@ -511,7 +388,7 @@ const CEODashboard = () => {
           </div>
         </div>
 
-        {/* Overview Mode */}
+        {/* Overview */}
         {viewMode === 'overview' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {departments.map(dept => (
@@ -535,9 +412,9 @@ const CEODashboard = () => {
                         <span className="text-sm text-gray-700 truncate max-w-[60%]">{project.name}</span>
                         <div className="flex items-center gap-2">
                           <div className="w-16 bg-gray-200 rounded-full h-1.5">
-                            <div 
+                            <div
                               className={`h-1.5 rounded-full ${
-                                project.status === 'green' ? 'bg-green-500' : 
+                                project.status === 'green' ? 'bg-green-500' :
                                 project.status === 'yellow' ? 'bg-yellow-500' : 'bg-red-500'
                               }`}
                               style={{ width: `${project.completion}%` }}
@@ -586,7 +463,7 @@ const CEODashboard = () => {
           </div>
         )}
 
-        {/* Details Mode */}
+        {/* Details */}
         {viewMode === 'details' && selectedDept && (
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex justify-between items-start mb-6">
@@ -629,7 +506,7 @@ const CEODashboard = () => {
                       <input
                         type="number"
                         value={value}
-                        onChange={(e) => updateMetric(selectedDept.id, key, parseFloat(e.target.value))}
+                        onChange={(e) => updateMetric(selectedDept.id, key, e.target.value)}
                         className="w-full px-2 py-1 border rounded"
                       />
                     ) : (
@@ -704,9 +581,9 @@ const CEODashboard = () => {
                       <div className="flex items-center gap-4">
                         <div className="flex-1">
                           <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div 
+                            <div
                               className={`h-2 rounded-full ${
-                                project.status === 'green' ? 'bg-green-500' : 
+                                project.status === 'green' ? 'bg-green-500' :
                                 project.status === 'yellow' ? 'bg-yellow-500' : 'bg-red-500'
                               }`}
                               style={{ width: `${project.completion}%` }}
@@ -717,7 +594,7 @@ const CEODashboard = () => {
                           <input
                             type="number"
                             value={project.completion}
-                            onChange={(e) => updateProject(selectedDept.id, project.id, 'completion', parseInt(e.target.value))}
+                            onChange={(e) => updateProject(selectedDept.id, project.id, 'completion', e.target.value)}
                             className="w-16 px-2 py-1 border rounded text-sm"
                             min="0"
                             max="100"
@@ -756,10 +633,10 @@ const CEODashboard = () => {
                     type="text"
                     placeholder="Add new blocker..."
                     className="flex-1 px-3 py-2 border rounded-lg"
-                    onKeyPress={(e) => {
+                    onKeyDown={(e) => {
                       if (e.key === 'Enter') {
-                        addBlocker(selectedDept.id, e.target.value);
-                        e.target.value = '';
+                        addBlocker(selectedDept.id, e.currentTarget.value);
+                        e.currentTarget.value = '';
                       }
                     }}
                   />
@@ -790,7 +667,7 @@ const CEODashboard = () => {
             </button>
 
             {/* Project Modal */}
-            {showProjectModal && (
+            {showProjectModal && selectedDept && (
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                 <div className="bg-white rounded-lg p-6 w-96">
                   <h3 className="text-lg font-semibold mb-4">Add New Project</h3>
@@ -798,19 +675,19 @@ const CEODashboard = () => {
                     type="text"
                     placeholder="Project Name"
                     value={newProject.name}
-                    onChange={(e) => setNewProject({...newProject, name: e.target.value})}
+                    onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
                     className="w-full px-3 py-2 border rounded-lg mb-3"
                   />
                   <input
                     type="date"
                     placeholder="Deadline"
                     value={newProject.deadline}
-                    onChange={(e) => setNewProject({...newProject, deadline: e.target.value})}
+                    onChange={(e) => setNewProject({ ...newProject, deadline: e.target.value })}
                     className="w-full px-3 py-2 border rounded-lg mb-3"
                   />
                   <select
                     value={newProject.status}
-                    onChange={(e) => setNewProject({...newProject, status: e.target.value})}
+                    onChange={(e) => setNewProject({ ...newProject, status: e.target.value })}
                     className="w-full px-3 py-2 border rounded-lg mb-3"
                   >
                     <option value="green">🟢 On Track</option>
@@ -821,7 +698,7 @@ const CEODashboard = () => {
                     type="number"
                     placeholder="Completion %"
                     value={newProject.completion}
-                    onChange={(e) => setNewProject({...newProject, completion: parseInt(e.target.value)})}
+                    onChange={(e) => setNewProject({ ...newProject, completion: Math.min(100, Math.max(0, parseInt(e.target.value || 0, 10))) })}
                     className="w-full px-3 py-2 border rounded-lg mb-4"
                     min="0"
                     max="100"
@@ -846,7 +723,7 @@ const CEODashboard = () => {
           </div>
         )}
 
-        {/* Weekly Updates Mode */}
+        {/* Weekly Updates */}
         {viewMode === 'updates' && (
           <div className="space-y-4">
             {departments.map(dept => (
@@ -909,7 +786,7 @@ const CEODashboard = () => {
           </div>
         )}
 
-        {/* Monthly Snapshot Mode */}
+        {/* Monthly Snapshot */}
         {viewMode === 'monthly' && (
           <div className="space-y-6">
             <div className="bg-white rounded-lg shadow-sm p-6">
@@ -951,11 +828,11 @@ const CEODashboard = () => {
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-600">Avg Completion</span>
                         <div className="flex items-center gap-1">
-                          {dept.monthlyStats.avgCompletion > 70 ? 
+                          {dept.monthlyStats.avgCompletion > 70 ?
                             <TrendingUp className="w-4 h-4 text-green-600" /> :
                             dept.monthlyStats.avgCompletion > 40 ?
-                            <Minus className="w-4 h-4 text-yellow-600" /> :
-                            <TrendingDown className="w-4 h-4 text-red-600" />
+                              <Minus className="w-4 h-4 text-yellow-600" /> :
+                              <TrendingDown className="w-4 h-4 text-red-600" />
                           }
                           <span className="font-semibold">{dept.monthlyStats.avgCompletion}%</span>
                         </div>
@@ -1011,7 +888,7 @@ const CEODashboard = () => {
                     <p className="text-sm text-gray-600">Avg Completion Rate</p>
                     <p className="text-2xl font-bold text-gray-900">
                       {Math.round(
-                        getMonthlySnapshot().reduce((sum, d) => sum + d.monthlyStats.avgCompletion, 0) / 
+                        getMonthlySnapshot().reduce((sum, d) => sum + d.monthlyStats.avgCompletion, 0) /
                         departments.length
                       )}%
                     </p>
@@ -1033,12 +910,14 @@ const CEODashboard = () => {
           <button
             onClick={() => {
               const dataStr = JSON.stringify(departments, null, 2);
-              const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+              const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
               const exportFileDefaultName = `ceo-dashboard-${new Date().toISOString().split('T')[0]}.json`;
               const linkElement = document.createElement('a');
               linkElement.setAttribute('href', dataUri);
               linkElement.setAttribute('download', exportFileDefaultName);
+              document.body.appendChild(linkElement);
               linkElement.click();
+              linkElement.remove();
             }}
             className="text-sm text-gray-500 hover:text-gray-700"
           >
@@ -1051,3 +930,4 @@ const CEODashboard = () => {
 };
 
 export default CEODashboard;
+
