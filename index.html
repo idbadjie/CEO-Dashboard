@@ -11,12 +11,12 @@
     <meta http-equiv="Expires" content="0" />
 
     <!-- Tailwind (CDN) -->
-    <script src="https://cdn.tailwindcss.com?v=2025-10-10-1"></script>
+    <script src="https://cdn.tailwindcss.com?v=2025-10-10-2"></script>
     <!-- React 18 + ReactDOM (UMD, production) -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js?v=2025-10-10-1" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js?v=2025-10-10-1" crossorigin></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js?v=2025-10-10-2" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js?v=2025-10-10-2" crossorigin></script>
     <!-- Babel for in-browser JSX transform WITH presets -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js?v=2025-10-10-1" data-presets="env,react"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js?v=2025-10-10-2" data-presets="env,react"></script>
   </head>
   <body class="bg-gray-50">
     <div id="root"></div>
@@ -24,15 +24,20 @@
     <script type="text/babel">
       const { useState, useEffect } = React;
 
-      // One-time: if old saved data doesn't have HR/Pharmacy, clear to show new structure
+      /* ---------- COMPAT GUARD ----------
+         If saved data pre-dates new departments (HR, Pharmacy, Marketing),
+         clear once so the new structure shows up. */
       try {
         const saved = JSON.parse(localStorage.getItem('ceoDashboardData') || 'null');
         if (Array.isArray(saved)) {
-          const hasHR = saved.some(d => d?.id === 'hr');
-          const hasPharm = saved.some(d => d?.id === 'pharmacy');
-          if (!hasHR || !hasPharm) localStorage.removeItem('ceoDashboardData');
+          const have = id => saved.some(d => d?.id === id);
+          if (!have('hr') || !have('pharmacy') || !have('marketing')) {
+            localStorage.removeItem('ceoDashboardData');
+          }
         }
-      } catch (_) { localStorage.removeItem('ceoDashboardData'); }
+      } catch (_) {
+        localStorage.removeItem('ceoDashboardData');
+      }
 
       const StatusPill = ({ status }) => {
         const map = {
@@ -49,51 +54,55 @@
       };
 
       function CEODashboard() {
-        // Initial departments (includes Pharmacy + HR)
+        // Initial departments (includes Pharmacy, HR, and Social Media & Marketing)
         const initialDepartments = [
           { id: 'ops', name: 'Operations', manager: 'Jagan', status: 'green',
             keyMetrics: { efficiency: 0, tasksCompleted: 0, onTimeDelivery: 0, qualityScore: 0 },
-            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: new Date().toISOString().split('T')[0] } },
+            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: today() } },
 
           { id: 'clinical', name: 'Clinical Operations', manager: 'Betty', status: 'green',
             keyMetrics: { patientSatisfaction: 0, clinicalAccuracy: 0, processCompliance: 0, turnaroundTime: 0 },
-            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: new Date().toISOString().split('T')[0] } },
+            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: today() } },
 
           { id: 'pharmacy', name: 'Pharmacy', manager: 'Dr. Jallow', status: 'green',
             keyMetrics: { rxAccuracy: 0, avgDispenseTime: 0, inventoryAccuracy: 0, counselingRate: 0 },
-            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: new Date().toISOString().split('T')[0] } },
+            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: today() } },
+
+          { id: 'marketing', name: 'Social Media & Marketing', manager: 'Awa', status: 'green',
+            keyMetrics: { campaignReach: 0, leadGen: 0, conversionRate: 0, publishingCadence: 0 },
+            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: today() } },
 
           { id: 'globalfund', name: 'Global Fund', manager: 'Nafi', status: 'green',
             keyMetrics: { fundingSecured: 0, proposalsSubmitted: 0, complianceScore: 0, reportingTimeliness: 0 },
-            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: new Date().toISOString().split('T')[0] } },
+            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: today() } },
 
           { id: 'retail', name: 'Retail', manager: 'Mabinta', status: 'green',
             keyMetrics: { salesGrowth: 0, inventoryTurnover: 0, customerSatisfaction: 0, storePerformance: 0 },
-            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: new Date().toISOString().split('T')[0] } },
+            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: today() } },
 
           { id: 'subscription', name: 'Subscription', manager: 'Lena', status: 'green',
             keyMetrics: { monthlyRecurringRevenue: 0, churnRate: 0, customerAcquisition: 0, retentionRate: 0 },
-            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: new Date().toISOString().split('T')[0] } },
+            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: today() } },
 
           { id: 'finance', name: 'Finance', manager: 'Yusupha', status: 'green',
             keyMetrics: { budgetVariance: 0, cashFlow: 0, accountsReceivable: 0, costReduction: 0 },
-            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: new Date().toISOString().split('T')[0] } },
+            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: today() } },
 
           { id: 'hr', name: 'Human Resources', manager: 'Mariam', status: 'green',
             keyMetrics: { retentionRate: 0, timeToHire: 0, trainingCompletion: 0, engagementScore: 0 },
-            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: new Date().toISOString().split('T')[0] } },
+            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: today() } },
 
           { id: 'srops', name: 'Senior Operations', manager: 'Vic', status: 'green',
             keyMetrics: { strategicGoals: 0, crossTeamCollaboration: 0, processOptimization: 0, leadershipScore: 0 },
-            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: new Date().toISOString().split('T')[0] } },
+            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: today() } },
 
           { id: 'technology', name: 'Technology', manager: 'Kendesoft', status: 'green',
             keyMetrics: { systemUptime: 0, bugResolution: 0, projectDelivery: 0, innovationIndex: 0 },
-            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: new Date().toISOString().split('T')[0] } },
+            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: today() } },
 
           { id: 'logistics', name: 'Logistics', manager: 'Modou', status: 'green',
             keyMetrics: { deliveryAccuracy: 0, warehouseEfficiency: 0, transportCost: 0, orderFulfillment: 0 },
-            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: new Date().toISOString().split('T')[0] } },
+            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: today() } },
         ];
 
         // State
@@ -115,10 +124,22 @@
           } catch { return []; }
         });
         const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0,7));
+        const [lastSaved, setLastSaved] = useState(() => localStorage.getItem('lastSavedAt') || '');
 
-        // Persist
-        useEffect(()=> localStorage.setItem('ceoDashboardData', JSON.stringify(departments)), [departments]);
-        useEffect(()=> localStorage.setItem('updateHistory', JSON.stringify(history)), [history]);
+        // Persist (AUTOSAVE)
+        useEffect(() => {
+          localStorage.setItem('ceoDashboardData', JSON.stringify(departments));
+          const t = new Date().toLocaleString();
+          localStorage.setItem('lastSavedAt', t);
+          setLastSaved(t);
+        }, [departments]);
+
+        useEffect(() => {
+          localStorage.setItem('updateHistory', JSON.stringify(history));
+        }, [history]);
+
+        // Helpers
+        function today(){ return new Date().toISOString().split('T')[0]; }
 
         const updateDeptStatus = (id, status) => {
           setDepartments(prev => prev.map(d => d.id===id ? { ...d, status } : d));
@@ -133,7 +154,7 @@
         const updateWeekly = (id, field, value) => {
           setDepartments(prev => prev.map(d => d.id===id ? {
             ...d,
-            weeklyUpdate: { ...d.weeklyUpdate, [field]: value, date: new Date().toISOString().split('T')[0] }
+            weeklyUpdate: { ...d.weeklyUpdate, [field]: value, date: today() }
           } : d));
           setHistory(h => [...h, { deptId: id, date: new Date().toISOString(), type:'weekly_update', field, value }]);
         };
@@ -204,20 +225,34 @@
                     <h1 className="text-2xl md:text-3xl font-bold text-gray-900">CEO Visibility Dashboard</h1>
                     <p className="text-gray-600 mt-2">High-level view of priorities, blockers, and momentum</p>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {['overview','details','updates','monthly'].map(mode => (
-                      <button key={mode}
-                        onClick={()=> setViewMode(mode)}
-                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${viewMode===mode?'bg-blue-600 text-white':'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-                        {...(mode==='details' && !selectedDept ? {disabled:true, title:'Select a department from Overview first'} : {})}
-                      >
-                        {mode==='overview' && 'Overview'}
-                        {mode==='details'  && 'Details'}
-                        {mode==='updates'  && 'Weekly Updates'}
-                        {mode==='monthly'  && 'Monthly Snapshot'}
-                      </button>
-                    ))}
+
+                  <div className="flex items-center gap-3">
+                    <div className="text-xs text-gray-500">
+                      <span className="inline-block px-2 py-1 bg-gray-100 rounded">Autosave: {lastSaved ? `Saved ${lastSaved}` : '—'}</span>
+                    </div>
+                    <button
+                      onClick={() => { localStorage.removeItem('ceoDashboardData'); localStorage.removeItem('updateHistory'); location.reload(); }}
+                      className="px-3 py-2 rounded-lg text-xs bg-gray-100 hover:bg-gray-200 text-gray-700"
+                      title="Clear saved data on this device"
+                    >
+                      Reset Data
+                    </button>
                   </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2 mt-4">
+                  {['overview','details','updates','monthly'].map(mode => (
+                    <button key={mode}
+                      onClick={()=> setViewMode(mode)}
+                      className={`px-4 py-2 rounded-lg font-medium transition-colors ${viewMode===mode?'bg-blue-600 text-white':'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                      {...(mode==='details' && !selectedDept ? {disabled:true, title:'Select a department from Overview first'} : {})}
+                    >
+                      {mode==='overview' && 'Overview'}
+                      {mode==='details'  && 'Details'}
+                      {mode==='updates'  && 'Weekly Updates'}
+                      {mode==='monthly'  && 'Monthly Snapshot'}
+                    </button>
+                  ))}
                 </div>
 
                 {/* Quick stats */}
@@ -322,7 +357,7 @@
                     <div className="flex items-center gap-2">
                       <button onClick={()=> setEditMode(m=>!m)}
                         className={`px-3 py-1.5 rounded-lg font-medium ${editMode?'bg-green-600 text-white':'bg-gray-100 text-gray-700'}`}>
-                        {editMode ? 'Save' : 'Edit'}
+                        {editMode ? 'Done' : 'Edit'}
                       </button>
                       <select
                         value={selectedDept.status}
