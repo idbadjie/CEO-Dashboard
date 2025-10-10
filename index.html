@@ -11,7 +11,7 @@
     <meta http-equiv="Expires" content="0" />
 
     <!-- Tailwind -->
-    <script src="https://cdn.tailwindcss.com?v=2025-10-10-3"></script>
+    <script src="https://cdn.tailwindcss.com?v=2025-10-10-4"></script>
     <!-- React 18 -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
@@ -29,6 +29,7 @@
       const { useState, useEffect, useRef } = React;
 
       /* ======== FIREBASE INIT ======== */
+      // ⬇️ Replace with your real config from Firebase console (no extra quotes/commas)
       const firebaseConfig = {
         apiKey: "AIzaSyAyt3CXWIKQ_bjQN48cw-GSXKKP5FbCoWs",
         authDomain: "ceo-visibility-tool-75651.firebaseapp.com",
@@ -37,15 +38,13 @@
         messagingSenderId: "451190943437",
         appId: "1:451190943437:web:9ee1a3891a79445aa3c384"
       };
-      firebase.initializeApp(firebaseConfig);
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
       const db = firebase.firestore();
-      // One shared doc for the whole dashboard.
-      const docRef = db.collection("ceo-dashboard").doc("state");
+      const docRef = db.collection("ceo-dashboard").doc("state"); // shared doc
 
-      // Simple UUID for write-origin detection to avoid echo loops.
       const clientId = (crypto?.randomUUID?.() || Math.random().toString(36).slice(2));
+      const today = () => new Date().toISOString().split("T")[0];
 
-      /* ======== UI HELPERS ======== */
       const StatusPill = ({ status }) => {
         const map = {
           green: { cls: "text-green-600 bg-green-100", emoji: "🟢" },
@@ -59,11 +58,9 @@
           </span>
         );
       };
-      const today = () => new Date().toISOString().split("T")[0];
 
-      /* ======== APP ======== */
       function CEODashboard() {
-        // Initial dataset (includes Pharmacy, HR, Social Media & Marketing)
+        // Initial dataset (Pharmacy, HR, Social Media & Marketing included)
         const initialDepartments = [
           { id:'ops', name:'Operations', manager:'Jagan', status:'green',
             keyMetrics:{ efficiency:0, tasksCompleted:0, onTimeDelivery:0, qualityScore:0 },
@@ -103,7 +100,7 @@
             projects:[], blockers:[], weeklyUpdate:{ wins:'',challenges:'',nextWeek:'',date:today() } },
         ];
 
-        // Local cache first (for fast load), Firestore will overwrite with live state.
+        // Read cache for fast first paint; live Firestore will override
         const cached = (() => {
           try { return JSON.parse(localStorage.getItem("ceoDashboardCache") || "null"); } catch { return null; }
         })();
@@ -111,20 +108,19 @@
         const [departments, setDepartments] = useState(cached?.departments || initialDepartments);
         const [history, setHistory] = useState(cached?.history || []);
         const [viewMode, setViewMode] = useState('overview');
-        const [selectedDept, setSelectedDept] = useState(null);
+        const [selectedDeptId, setSelectedDeptId] = useState(null); // <-- use ID, not object
         const [editMode, setEditMode] = useState(false);
-        const [newProject, setNewProject] = useState({ name:'', deadline:'', status:'green', completion:0 });
+        const [newProject, setNewProject] = useState({ name:'', deadline:'', status:'green', completion:0, comments:'' });
         const [showModal, setShowModal] = useState(false);
         const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0,7));
         const [lastSaved, setLastSaved] = useState(cached?.lastSavedAt || '');
         const savingRef = useRef(false);
         const debounceRef = useRef(null);
 
-        // Real-time listener (one source of truth)
+        // Real-time listener
         useEffect(() => {
           const unsub = docRef.onSnapshot(async (snap) => {
             if (!snap.exists) {
-              // Initialize remote doc once
               await docRef.set({
                 departments: initialDepartments,
                 updateHistory: [],
@@ -134,13 +130,10 @@
               return;
             }
             const data = snap.data();
-            // Ignore our own write echo
-            if (data?._lastWriter === clientId) return;
-
+            if (data?._lastWriter === clientId) return; // ignore our own write echo
             setDepartments(data.departments || initialDepartments);
             setHistory(data.updateHistory || []);
             setLastSaved(new Date(data.lastSavedAt || Date.now()).toLocaleString());
-            // Refresh local cache
             localStorage.setItem("ceoDashboardCache", JSON.stringify({
               departments: data.departments || initialDepartments,
               history: data.updateHistory || [],
@@ -150,24 +143,16 @@
           return () => unsub();
         }, []);
 
-        // Autosave (debounced) → Firestore + local cache
+        // Autosave (debounced)
         useEffect(() => {
-          // Save local cache immediately for snappy reloads
           localStorage.setItem("ceoDashboardCache", JSON.stringify({
             departments, history, lastSavedAt: new Date().toISOString()
           }));
-
-          // Debounce writes to Firestore
           if (debounceRef.current) clearTimeout(debounceRef.current);
           debounceRef.current = setTimeout(async () => {
             savingRef.current = true;
             const lastSavedAt = new Date().toISOString();
-            await docRef.set({
-              departments,
-              updateHistory: history,
-              lastSavedAt,
-              _lastWriter: clientId
-            }, { merge: true });
+            await docRef.set({ departments, updateHistory: history, lastSavedAt, _lastWriter: clientId }, { merge: true });
             setLastSaved(new Date(lastSavedAt).toLocaleString());
             savingRef.current = false;
           }, 700);
@@ -176,7 +161,6 @@
         // Mutators
         const updateDeptStatus = (id, status) => {
           setDepartments(prev => prev.map(d => d.id===id ? { ...d, status } : d));
-          if (selectedDept?.id === id) setSelectedDept(prev => ({ ...prev, status }));
         };
         const updateMetric = (id, key, value) => {
           const num = Number.isNaN(parseFloat(value)) ? 0 : parseFloat(value);
@@ -184,23 +168,28 @@
         };
         const updateWeekly = (id, field, value) => {
           setDepartments(prev => prev.map(d => d.id===id ? {
-            ...d,
-            weeklyUpdate: { ...d.weeklyUpdate, [field]: value, date: today() }
+            ...d, weeklyUpdate: { ...d.weeklyUpdate, [field]: value, date: today() }
           } : d));
           setHistory(h => [...h, { deptId:id, date:new Date().toISOString(), type:'weekly_update', field, value }]);
         };
         const addProject = (deptId) => {
           if (!newProject.name.trim()) return;
           setDepartments(prev => prev.map(d => d.id===deptId ? {
-            ...d, projects: [...d.projects, { ...newProject, id: Date.now() }]
+            ...d,
+            projects: [...d.projects, { ...newProject, id: Date.now() }]
           } : d));
-          setNewProject({ name:'', deadline:'', status:'green', completion:0 });
+          setNewProject({ name:'', deadline:'', status:'green', completion:0, comments:'' });
           setShowModal(false);
         };
         const updateProject = (deptId, projectId, field, value) => {
           setDepartments(prev => prev.map(d => d.id===deptId ? {
             ...d, projects: d.projects.map(p => p.id===projectId
-              ? { ...p, [field]: field==='completion' ? Math.min(100, Math.max(0, parseInt(value||0,10))) : value }
+              ? { ...p,
+                  [field]:
+                    field==='completion'
+                      ? Math.min(100, Math.max(0, parseInt(value ?? 0, 10)))
+                      : value
+                }
               : p)
           } : d));
         };
@@ -221,7 +210,6 @@
           } : d));
         };
 
-        // Monthly snapshot
         const monthlySnapshot = () => {
           const monthData = history.filter(h => h.date?.startsWith?.(selectedMonth));
           return departments.map(d => {
@@ -239,6 +227,9 @@
         const offTrack= departments.filter(d=>d.status==='red').length;
         const blockers= departments.reduce((s,d)=>s+d.blockers.length,0);
         const projects= departments.reduce((s,d)=>s+d.projects.length,0);
+
+        // Live dept for details view
+        const liveDept = selectedDeptId ? departments.find(d => d.id === selectedDeptId) : null;
 
         return (
           <div className="min-h-screen p-4 md:p-6">
@@ -275,7 +266,7 @@
                     <button key={mode}
                       onClick={()=> setViewMode(mode)}
                       className={`px-4 py-2 rounded-lg font-medium transition-colors ${viewMode===mode?'bg-blue-600 text-white':'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-                      {...(mode==='details' && !selectedDept ? {disabled:true, title:'Select a department from Overview first'} : {})}
+                      {...(mode==='details' && !liveDept ? {disabled:true, title:'Select a department from Overview first'} : {})}
                     >
                       {mode==='overview' && 'Overview'}
                       {mode==='details'  && 'Details'}
@@ -340,7 +331,7 @@
                       <div className="flex items-center justify-between text-xs text-gray-500">
                         <span>Last update: {dept.weeklyUpdate.date}</span>
                         <button
-                          onClick={()=>{ setSelectedDept(dept); setViewMode('details'); }}
+                          onClick={()=>{ setSelectedDeptId(dept.id); setViewMode('details'); }}
                           className="text-blue-600 hover:text-blue-700 font-medium"
                         >View →</button>
                       </div>
@@ -350,9 +341,9 @@
               )}
 
               {/* Details */}
-              {viewMode==='details' && selectedDept && (
+              {viewMode==='details' && liveDept && (
                 <DetailsView
-                  dept={selectedDept}
+                  dept={liveDept}  /* <-- always the live object */
                   editMode={editMode}
                   setEditMode={setEditMode}
                   updateDeptStatus={updateDeptStatus}
@@ -366,7 +357,7 @@
                   setShowModal={setShowModal}
                   addBlocker={addBlocker}
                   removeBlocker={removeBlocker}
-                  goBack={()=> setSelectedDept(null)}
+                  goBack={()=> setSelectedDeptId(null)}
                 />
               )}
 
@@ -475,6 +466,7 @@
               </div>
             </div>
 
+            {/* Key Metrics */}
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Key Metrics</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -493,6 +485,7 @@
               </div>
             </div>
 
+            {/* Projects */}
             <div className="mb-6">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">Projects</h3>
@@ -532,7 +525,8 @@
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-4">
+
+                      <div className="flex items-center gap-4 mb-3">
                         <div className="flex-1">
                           <div className="w-full bg-gray-200 rounded-full h-2">
                             <div className={`${p.status==='green'?'bg-green-500':p.status==='yellow'?'bg-yellow-500':'bg-red-500'} h-2 rounded-full`} style={{width:`${p.completion}%`}}></div>
@@ -547,12 +541,31 @@
                         )}
                         <span className="text-sm text-gray-600">Due: {p.deadline || 'TBD'}</span>
                       </div>
+
+                      {/* Comments */}
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 block mb-1">Comments / Notes</label>
+                        {editMode ? (
+                          <textarea
+                            className="w-full px-3 py-2 border rounded-lg text-gray-700"
+                            rows="2"
+                            value={p.comments || ''}
+                            onChange={(e)=> updateProject(dept.id, p.id, 'comments', e.target.value)}
+                            placeholder="Add context, decisions, risks…"
+                          />
+                        ) : (
+                          <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                            {p.comments ? p.comments : <span className="text-gray-400">No comments yet.</span>}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
               ) : <p className="text-gray-500">No projects added yet</p>}
             </div>
 
+            {/* Blockers */}
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Blockers & Escalations</h3>
               <div className="space-y-2">
@@ -586,9 +599,13 @@
                     <option value="yellow">🟡 At Risk</option>
                     <option value="red">🔴 Off Track</option>
                   </select>
-                  <input type="number" min="0" max="100" className="w-full px-3 py-2 border rounded-lg mb-4"
+                  <input type="number" min="0" max="100" className="w-full px-3 py-2 border rounded-lg mb-3"
                     placeholder="Completion %" value={newProject.completion}
                     onChange={e=> setNewProject({...newProject, completion: Math.min(100, Math.max(0, parseInt(e.target.value||0,10)))})}/>
+                  <textarea className="w-full px-3 py-2 border rounded-lg mb-4" rows="2"
+                    placeholder="Comments / Notes (optional)"
+                    value={newProject.comments}
+                    onChange={e=> setNewProject({...newProject, comments: e.target.value})}/>
                   <div className="flex gap-2">
                     <button className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium"
                       onClick={()=> addProject(dept.id)}>Add Project</button>
@@ -680,7 +697,6 @@
         return <div className={`flex items-center gap-1 ${color}`}><span>{children}</span><span className="text-xs font-medium">{text}</span></div>;
       };
 
-      // Mount
       ReactDOM.createRoot(document.getElementById('root')).render(<CEODashboard />);
     </script>
   </body>
