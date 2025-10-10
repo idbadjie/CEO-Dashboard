@@ -18,7 +18,6 @@
     <script type="text/babel">
       const { useState, useEffect } = React;
 
-      // Simple emoji/icon helpers (no external icon package needed)
       const StatusPill = ({ status }) => {
         const map = {
           green: { text: "On track", cls: "text-green-600 bg-green-100", emoji: "🟢" },
@@ -34,7 +33,7 @@
       };
 
       function CEODashboard() {
-        // Initial departments (now includes Mariam - Human Resources)
+        // Initial departments (now includes Human Resources and Pharmacy)
         const initialDepartments = [
           { id: 'ops', name: 'Operations', manager: 'Jagan', status: 'green',
             keyMetrics: { efficiency: 0, tasksCompleted: 0, onTimeDelivery: 0, qualityScore: 0 },
@@ -42,6 +41,12 @@
           { id: 'clinical', name: 'Clinical Operations', manager: 'Betty', status: 'green',
             keyMetrics: { patientSatisfaction: 0, clinicalAccuracy: 0, processCompliance: 0, turnaroundTime: 0 },
             projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: new Date().toISOString().split('T')[0] } },
+
+          // Pharmacy (Dr. Jallow)
+          { id: 'pharmacy', name: 'Pharmacy', manager: 'Dr. Jallow', status: 'green',
+            keyMetrics: { rxAccuracy: 0, avgDispenseTime: 0, inventoryAccuracy: 0, counselingRate: 0 },
+            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: new Date().toISOString().split('T')[0] } },
+
           { id: 'globalfund', name: 'Global Fund', manager: 'Nafi', status: 'green',
             keyMetrics: { fundingSecured: 0, proposalsSubmitted: 0, complianceScore: 0, reportingTimeliness: 0 },
             projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: new Date().toISOString().split('T')[0] } },
@@ -55,7 +60,7 @@
             keyMetrics: { budgetVariance: 0, cashFlow: 0, accountsReceivable: 0, costReduction: 0 },
             projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: new Date().toISOString().split('T')[0] } },
 
-          <!-- ✅ New Department -->
+          // Human Resources (Mariam)
           { id: 'hr', name: 'Human Resources', manager: 'Mariam', status: 'green',
             keyMetrics: { retentionRate: 0, timeToHire: 0, trainingCompletion: 0, engagementScore: 0 },
             projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: new Date().toISOString().split('T')[0] } },
