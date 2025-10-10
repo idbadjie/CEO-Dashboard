@@ -3,42 +3,49 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>CEO Visibility Dashboard</title>
+    <title>CEO Visibility Dashboard (Live)</title>
 
-    <!-- Prevent stale caching -->
+    <!-- Cache-bust & defaults -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
 
-    <!-- Tailwind (CDN) -->
-    <script src="https://cdn.tailwindcss.com?v=2025-10-10-2"></script>
-    <!-- React 18 + ReactDOM (UMD, production) -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js?v=2025-10-10-2" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js?v=2025-10-10-2" crossorigin></script>
-    <!-- Babel for in-browser JSX transform WITH presets -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js?v=2025-10-10-2" data-presets="env,react"></script>
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com?v=2025-10-10-3"></script>
+    <!-- React 18 -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- Babel (JSX) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js" data-presets="env,react"></script>
+
+    <!-- Firebase (Compat for brevity) -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
   </head>
   <body class="bg-gray-50">
     <div id="root"></div>
 
     <script type="text/babel">
-      const { useState, useEffect } = React;
+      const { useState, useEffect, useRef } = React;
 
-      /* ---------- COMPAT GUARD ----------
-         If saved data pre-dates new departments (HR, Pharmacy, Marketing),
-         clear once so the new structure shows up. */
-      try {
-        const saved = JSON.parse(localStorage.getItem('ceoDashboardData') || 'null');
-        if (Array.isArray(saved)) {
-          const have = id => saved.some(d => d?.id === id);
-          if (!have('hr') || !have('pharmacy') || !have('marketing')) {
-            localStorage.removeItem('ceoDashboardData');
-          }
-        }
-      } catch (_) {
-        localStorage.removeItem('ceoDashboardData');
-      }
+      /* ======== FIREBASE INIT ======== */
+      const firebaseConfig = {
+        apiKey: "REPLACE_ME",
+        authDomain: "REPLACE_ME.firebaseapp.com",
+        projectId: "REPLACE_ME",
+        storageBucket: "REPLACE_ME.appspot.com",
+        messagingSenderId: "REPLACE_ME",
+        appId: "REPLACE_ME"
+      };
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+      // One shared doc for the whole dashboard.
+      const docRef = db.collection("ceo-dashboard").doc("state");
 
+      // Simple UUID for write-origin detection to avoid echo loops.
+      const clientId = (crypto?.randomUUID?.() || Math.random().toString(36).slice(2));
+
+      /* ======== UI HELPERS ======== */
       const StatusPill = ({ status }) => {
         const map = {
           green: { cls: "text-green-600 bg-green-100", emoji: "🟢" },
@@ -52,159 +59,177 @@
           </span>
         );
       };
+      const today = () => new Date().toISOString().split("T")[0];
 
+      /* ======== APP ======== */
       function CEODashboard() {
-        // Initial departments (includes Pharmacy, HR, and Social Media & Marketing)
+        // Initial dataset (includes Pharmacy, HR, Social Media & Marketing)
         const initialDepartments = [
-          { id: 'ops', name: 'Operations', manager: 'Jagan', status: 'green',
-            keyMetrics: { efficiency: 0, tasksCompleted: 0, onTimeDelivery: 0, qualityScore: 0 },
-            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: today() } },
-
-          { id: 'clinical', name: 'Clinical Operations', manager: 'Betty', status: 'green',
-            keyMetrics: { patientSatisfaction: 0, clinicalAccuracy: 0, processCompliance: 0, turnaroundTime: 0 },
-            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: today() } },
-
-          { id: 'pharmacy', name: 'Pharmacy', manager: 'Dr. Jallow', status: 'green',
-            keyMetrics: { rxAccuracy: 0, avgDispenseTime: 0, inventoryAccuracy: 0, counselingRate: 0 },
-            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: today() } },
-
-          { id: 'marketing', name: 'Social Media & Marketing', manager: 'Awa', status: 'green',
-            keyMetrics: { campaignReach: 0, leadGen: 0, conversionRate: 0, publishingCadence: 0 },
-            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: today() } },
-
-          { id: 'globalfund', name: 'Global Fund', manager: 'Nafi', status: 'green',
-            keyMetrics: { fundingSecured: 0, proposalsSubmitted: 0, complianceScore: 0, reportingTimeliness: 0 },
-            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: today() } },
-
-          { id: 'retail', name: 'Retail', manager: 'Mabinta', status: 'green',
-            keyMetrics: { salesGrowth: 0, inventoryTurnover: 0, customerSatisfaction: 0, storePerformance: 0 },
-            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: today() } },
-
-          { id: 'subscription', name: 'Subscription', manager: 'Lena', status: 'green',
-            keyMetrics: { monthlyRecurringRevenue: 0, churnRate: 0, customerAcquisition: 0, retentionRate: 0 },
-            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: today() } },
-
-          { id: 'finance', name: 'Finance', manager: 'Yusupha', status: 'green',
-            keyMetrics: { budgetVariance: 0, cashFlow: 0, accountsReceivable: 0, costReduction: 0 },
-            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: today() } },
-
-          { id: 'hr', name: 'Human Resources', manager: 'Mariam', status: 'green',
-            keyMetrics: { retentionRate: 0, timeToHire: 0, trainingCompletion: 0, engagementScore: 0 },
-            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: today() } },
-
-          { id: 'srops', name: 'Senior Operations', manager: 'Vic', status: 'green',
-            keyMetrics: { strategicGoals: 0, crossTeamCollaboration: 0, processOptimization: 0, leadershipScore: 0 },
-            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: today() } },
-
-          { id: 'technology', name: 'Technology', manager: 'Kendesoft', status: 'green',
-            keyMetrics: { systemUptime: 0, bugResolution: 0, projectDelivery: 0, innovationIndex: 0 },
-            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: today() } },
-
-          { id: 'logistics', name: 'Logistics', manager: 'Modou', status: 'green',
-            keyMetrics: { deliveryAccuracy: 0, warehouseEfficiency: 0, transportCost: 0, orderFulfillment: 0 },
-            projects: [], blockers: [], weeklyUpdate: { wins:'',challenges:'',nextWeek:'',date: today() } },
+          { id:'ops', name:'Operations', manager:'Jagan', status:'green',
+            keyMetrics:{ efficiency:0, tasksCompleted:0, onTimeDelivery:0, qualityScore:0 },
+            projects:[], blockers:[], weeklyUpdate:{ wins:'',challenges:'',nextWeek:'',date:today() } },
+          { id:'clinical', name:'Clinical Operations', manager:'Betty', status:'green',
+            keyMetrics:{ patientSatisfaction:0, clinicalAccuracy:0, processCompliance:0, turnaroundTime:0 },
+            projects:[], blockers:[], weeklyUpdate:{ wins:'',challenges:'',nextWeek:'',date:today() } },
+          { id:'pharmacy', name:'Pharmacy', manager:'Dr. Jallow', status:'green',
+            keyMetrics:{ rxAccuracy:0, avgDispenseTime:0, inventoryAccuracy:0, counselingRate:0 },
+            projects:[], blockers:[], weeklyUpdate:{ wins:'',challenges:'',nextWeek:'',date:today() } },
+          { id:'marketing', name:'Social Media & Marketing', manager:'Awa', status:'green',
+            keyMetrics:{ campaignReach:0, leadGen:0, conversionRate:0, publishingCadence:0 },
+            projects:[], blockers:[], weeklyUpdate:{ wins:'',challenges:'',nextWeek:'',date:today() } },
+          { id:'globalfund', name:'Global Fund', manager:'Nafi', status:'green',
+            keyMetrics:{ fundingSecured:0, proposalsSubmitted:0, complianceScore:0, reportingTimeliness:0 },
+            projects:[], blockers:[], weeklyUpdate:{ wins:'',challenges:'',nextWeek:'',date:today() } },
+          { id:'retail', name:'Retail', manager:'Mabinta', status:'green',
+            keyMetrics:{ salesGrowth:0, inventoryTurnover:0, customerSatisfaction:0, storePerformance:0 },
+            projects:[], blockers:[], weeklyUpdate:{ wins:'',challenges:'',nextWeek:'',date:today() } },
+          { id:'subscription', name:'Subscription', manager:'Lena', status:'green',
+            keyMetrics:{ monthlyRecurringRevenue:0, churnRate:0, customerAcquisition:0, retentionRate:0 },
+            projects:[], blockers:[], weeklyUpdate:{ wins:'',challenges:'',nextWeek:'',date:today() } },
+          { id:'finance', name:'Finance', manager:'Yusupha', status:'green',
+            keyMetrics:{ budgetVariance:0, cashFlow:0, accountsReceivable:0, costReduction:0 },
+            projects:[], blockers:[], weeklyUpdate:{ wins:'',challenges:'',nextWeek:'',date:today() } },
+          { id:'hr', name:'Human Resources', manager:'Mariam', status:'green',
+            keyMetrics:{ retentionRate:0, timeToHire:0, trainingCompletion:0, engagementScore:0 },
+            projects:[], blockers:[], weeklyUpdate:{ wins:'',challenges:'',nextWeek:'',date:today() } },
+          { id:'srops', name:'Senior Operations', manager:'Vic', status:'green',
+            keyMetrics:{ strategicGoals:0, crossTeamCollaboration:0, processOptimization:0, leadershipScore:0 },
+            projects:[], blockers:[], weeklyUpdate:{ wins:'',challenges:'',nextWeek:'',date:today() } },
+          { id:'technology', name:'Technology', manager:'Kendesoft', status:'green',
+            keyMetrics:{ systemUptime:0, bugResolution:0, projectDelivery:0, innovationIndex:0 },
+            projects:[], blockers:[], weeklyUpdate:{ wins:'',challenges:'',nextWeek:'',date:today() } },
+          { id:'logistics', name:'Logistics', manager:'Modou', status:'green',
+            keyMetrics:{ deliveryAccuracy:0, warehouseEfficiency:0, transportCost:0, orderFulfillment:0 },
+            projects:[], blockers:[], weeklyUpdate:{ wins:'',challenges:'',nextWeek:'',date:today() } },
         ];
 
-        // State
-        const [departments, setDepartments] = useState(() => {
-          try {
-            const saved = localStorage.getItem('ceoDashboardData');
-            return saved ? JSON.parse(saved) : initialDepartments;
-          } catch { return initialDepartments; }
-        });
-        const [viewMode, setViewMode] = useState('overview'); // overview | details | updates | monthly
+        // Local cache first (for fast load), Firestore will overwrite with live state.
+        const cached = (() => {
+          try { return JSON.parse(localStorage.getItem("ceoDashboardCache") || "null"); } catch { return null; }
+        })();
+
+        const [departments, setDepartments] = useState(cached?.departments || initialDepartments);
+        const [history, setHistory] = useState(cached?.history || []);
+        const [viewMode, setViewMode] = useState('overview');
         const [selectedDept, setSelectedDept] = useState(null);
         const [editMode, setEditMode] = useState(false);
         const [newProject, setNewProject] = useState({ name:'', deadline:'', status:'green', completion:0 });
         const [showModal, setShowModal] = useState(false);
-        const [history, setHistory] = useState(() => {
-          try {
-            const saved = localStorage.getItem('updateHistory');
-            return saved ? JSON.parse(saved) : [];
-          } catch { return []; }
-        });
         const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0,7));
-        const [lastSaved, setLastSaved] = useState(() => localStorage.getItem('lastSavedAt') || '');
+        const [lastSaved, setLastSaved] = useState(cached?.lastSavedAt || '');
+        const savingRef = useRef(false);
+        const debounceRef = useRef(null);
 
-        // Persist (AUTOSAVE)
+        // Real-time listener (one source of truth)
         useEffect(() => {
-          localStorage.setItem('ceoDashboardData', JSON.stringify(departments));
-          const t = new Date().toLocaleString();
-          localStorage.setItem('lastSavedAt', t);
-          setLastSaved(t);
-        }, [departments]);
+          const unsub = docRef.onSnapshot(async (snap) => {
+            if (!snap.exists) {
+              // Initialize remote doc once
+              await docRef.set({
+                departments: initialDepartments,
+                updateHistory: [],
+                lastSavedAt: new Date().toISOString(),
+                _lastWriter: clientId
+              });
+              return;
+            }
+            const data = snap.data();
+            // Ignore our own write echo
+            if (data?._lastWriter === clientId) return;
 
+            setDepartments(data.departments || initialDepartments);
+            setHistory(data.updateHistory || []);
+            setLastSaved(new Date(data.lastSavedAt || Date.now()).toLocaleString());
+            // Refresh local cache
+            localStorage.setItem("ceoDashboardCache", JSON.stringify({
+              departments: data.departments || initialDepartments,
+              history: data.updateHistory || [],
+              lastSavedAt: data.lastSavedAt || new Date().toISOString()
+            }));
+          });
+          return () => unsub();
+        }, []);
+
+        // Autosave (debounced) → Firestore + local cache
         useEffect(() => {
-          localStorage.setItem('updateHistory', JSON.stringify(history));
-        }, [history]);
+          // Save local cache immediately for snappy reloads
+          localStorage.setItem("ceoDashboardCache", JSON.stringify({
+            departments, history, lastSavedAt: new Date().toISOString()
+          }));
 
-        // Helpers
-        function today(){ return new Date().toISOString().split('T')[0]; }
+          // Debounce writes to Firestore
+          if (debounceRef.current) clearTimeout(debounceRef.current);
+          debounceRef.current = setTimeout(async () => {
+            savingRef.current = true;
+            const lastSavedAt = new Date().toISOString();
+            await docRef.set({
+              departments,
+              updateHistory: history,
+              lastSavedAt,
+              _lastWriter: clientId
+            }, { merge: true });
+            setLastSaved(new Date(lastSavedAt).toLocaleString());
+            savingRef.current = false;
+          }, 700);
+        }, [departments, history]);
 
+        // Mutators
         const updateDeptStatus = (id, status) => {
           setDepartments(prev => prev.map(d => d.id===id ? { ...d, status } : d));
           if (selectedDept?.id === id) setSelectedDept(prev => ({ ...prev, status }));
         };
-
         const updateMetric = (id, key, value) => {
           const num = Number.isNaN(parseFloat(value)) ? 0 : parseFloat(value);
           setDepartments(prev => prev.map(d => d.id===id ? { ...d, keyMetrics: { ...d.keyMetrics, [key]: num } } : d));
         };
-
         const updateWeekly = (id, field, value) => {
           setDepartments(prev => prev.map(d => d.id===id ? {
             ...d,
             weeklyUpdate: { ...d.weeklyUpdate, [field]: value, date: today() }
           } : d));
-          setHistory(h => [...h, { deptId: id, date: new Date().toISOString(), type:'weekly_update', field, value }]);
+          setHistory(h => [...h, { deptId:id, date:new Date().toISOString(), type:'weekly_update', field, value }]);
         };
-
         const addProject = (deptId) => {
           if (!newProject.name.trim()) return;
           setDepartments(prev => prev.map(d => d.id===deptId ? {
-            ...d,
-            projects: [...d.projects, { ...newProject, id: Date.now() }]
+            ...d, projects: [...d.projects, { ...newProject, id: Date.now() }]
           } : d));
           setNewProject({ name:'', deadline:'', status:'green', completion:0 });
           setShowModal(false);
         };
-
         const updateProject = (deptId, projectId, field, value) => {
           setDepartments(prev => prev.map(d => d.id===deptId ? {
-            ...d,
-            projects: d.projects.map(p => p.id===projectId
+            ...d, projects: d.projects.map(p => p.id===projectId
               ? { ...p, [field]: field==='completion' ? Math.min(100, Math.max(0, parseInt(value||0,10))) : value }
               : p)
           } : d));
         };
-
         const deleteProject = (deptId, projectId) => {
           setDepartments(prev => prev.map(d => d.id===deptId ? {
             ...d, projects: d.projects.filter(p => p.id!==projectId)
           } : d));
         };
-
         const addBlocker = (deptId, text) => {
           if (!text.trim()) return;
           setDepartments(prev => prev.map(d => d.id===deptId ? {
             ...d, blockers: [...d.blockers, { id: Date.now(), text, date: new Date().toISOString() }]
           } : d));
         };
-
         const removeBlocker = (deptId, blockerId) => {
           setDepartments(prev => prev.map(d => d.id===deptId ? {
             ...d, blockers: d.blockers.filter(b => b.id !== blockerId)
           } : d));
         };
 
+        // Monthly snapshot
         const monthlySnapshot = () => {
-          const monthData = history.filter(h => h.date.startsWith(selectedMonth));
+          const monthData = history.filter(h => h.date?.startsWith?.(selectedMonth));
           return departments.map(d => {
             const deptUpdates = monthData.filter(u => u.deptId === d.id);
             const total = d.projects.length;
             const completed = d.projects.filter(p => (p.completion||0) === 100).length;
             const avg = total>0 ? Math.round(d.projects.reduce((s,p)=>s+(p.completion||0),0)/total) : 0;
-            return { ...d, monthlyStats:{ updates: deptUpdates.length, projectsTotal: total, projectsCompleted: completed, avgCompletion: avg, blockerCount: d.blockers.length } };
+            return { ...d, monthlyStats:{ updates:deptUpdates.length, projectsTotal:total, projectsCompleted:completed, avgCompletion:avg, blockerCount:d.blockers.length } };
           });
         };
 
@@ -223,24 +248,29 @@
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <div>
                     <h1 className="text-2xl md:text-3xl font-bold text-gray-900">CEO Visibility Dashboard</h1>
-                    <p className="text-gray-600 mt-2">High-level view of priorities, blockers, and momentum</p>
+                    <p className="text-gray-600 mt-2">High-level view of priorities, blockers, and momentum (Live Sync)</p>
                   </div>
-
                   <div className="flex items-center gap-3">
-                    <div className="text-xs text-gray-500">
-                      <span className="inline-block px-2 py-1 bg-gray-100 rounded">Autosave: {lastSaved ? `Saved ${lastSaved}` : '—'}</span>
-                    </div>
+                    <span className="text-xs px-2 py-1 bg-gray-100 rounded text-gray-600">
+                      {savingRef.current ? "Saving..." : (lastSaved ? `Saved ${lastSaved}` : "—")}
+                    </span>
                     <button
-                      onClick={() => { localStorage.removeItem('ceoDashboardData'); localStorage.removeItem('updateHistory'); location.reload(); }}
+                      onClick={async () => {
+                        if (!confirm("This will clear the SHARED dashboard for everyone. Continue?")) return;
+                        await docRef.set({
+                          departments: initialDepartments, updateHistory: [],
+                          lastSavedAt: new Date().toISOString(), _lastWriter: clientId
+                        });
+                      }}
                       className="px-3 py-2 rounded-lg text-xs bg-gray-100 hover:bg-gray-200 text-gray-700"
-                      title="Clear saved data on this device"
+                      title="Reset the shared data for all users"
                     >
-                      Reset Data
+                      Reset Shared Data
                     </button>
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-2 mt-4">
+                <div className="flex flex-wrap gap-2">
                   {['overview','details','updates','monthly'].map(mode => (
                     <button key={mode}
                       onClick={()=> setViewMode(mode)}
@@ -257,40 +287,15 @@
 
                 {/* Quick stats */}
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-6">
-                  <div className="bg-green-50 rounded-lg p-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-green-900 font-medium text-sm">On Track</span>
-                      <span className="text-xl font-bold text-green-600">{onTrack}</span>
-                    </div>
-                  </div>
-                  <div className="bg-yellow-50 rounded-lg p-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-yellow-900 font-medium text-sm">At Risk</span>
-                      <span className="text-xl font-bold text-yellow-600">{atRisk}</span>
-                    </div>
-                  </div>
-                  <div className="bg-red-50 rounded-lg p-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-red-900 font-medium text-sm">Off Track</span>
-                      <span className="text-xl font-bold text-red-600">{offTrack}</span>
-                    </div>
-                  </div>
-                  <div className="bg-blue-50 rounded-lg p-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-blue-900 font-medium text-sm">Blockers</span>
-                      <span className="text-xl font-bold text-blue-600">{blockers}</span>
-                    </div>
-                  </div>
-                  <div className="bg-purple-50 rounded-lg p-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-purple-900 font-medium text-sm">Projects</span>
-                      <span className="text-xl font-bold text-purple-600">{projects}</span>
-                    </div>
-                  </div>
+                  <CardStat label="On Track" value={onTrack} cls="bg-green-50 text-green-900" valCls="text-green-600"/>
+                  <CardStat label="At Risk" value={atRisk} cls="bg-yellow-50 text-yellow-900" valCls="text-yellow-600"/>
+                  <CardStat label="Off Track" value={offTrack} cls="bg-red-50 text-red-900" valCls="text-red-600"/>
+                  <CardStat label="Blockers" value={blockers} cls="bg-blue-50 text-blue-900" valCls="text-blue-600"/>
+                  <CardStat label="Projects" value={projects} cls="bg-purple-50 text-purple-900" valCls="text-purple-600"/>
                 </div>
               </div>
 
-              {/* Overview cards */}
+              {/* Overview */}
               {viewMode==='overview' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {departments.map(dept => (
@@ -303,7 +308,6 @@
                         <StatusPill status={dept.status}/>
                       </div>
 
-                      {/* Projects preview */}
                       {dept.projects.length>0 ? (
                         <div className="space-y-2 mb-4">
                           {dept.projects.slice(0,2).map(p=>(
@@ -321,7 +325,6 @@
                         </div>
                       ) : <p className="text-sm text-gray-500 mb-4">No active projects</p>}
 
-                      {/* Blocker preview */}
                       {dept.blockers.length>0 && (
                         <div className="bg-red-50 rounded-lg p-3 mb-3">
                           <div className="flex items-center gap-2 mb-1">
@@ -346,159 +349,25 @@
                 </div>
               )}
 
-              {/* Details view */}
+              {/* Details */}
               {viewMode==='details' && selectedDept && (
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                  <div className="flex justify-between items-start mb-6">
-                    <div>
-                      <h2 className="text-2xl font-bold text-gray-900">{selectedDept.name}</h2>
-                      <p className="text-gray-600">Manager: {selectedDept.manager}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button onClick={()=> setEditMode(m=>!m)}
-                        className={`px-3 py-1.5 rounded-lg font-medium ${editMode?'bg-green-600 text-white':'bg-gray-100 text-gray-700'}`}>
-                        {editMode ? 'Done' : 'Edit'}
-                      </button>
-                      <select
-                        value={selectedDept.status}
-                        onChange={(e)=> updateDeptStatus(selectedDept.id, e.target.value)}
-                        className="px-4 py-2 rounded-lg font-medium border-2"
-                      >
-                        <option value="green">🟢 On Track</option>
-                        <option value="yellow">🟡 At Risk</option>
-                        <option value="red">🔴 Off Track</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Key metrics */}
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Key Metrics</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      {Object.entries(selectedDept.keyMetrics).map(([k,v])=>(
-                        <div key={k} className="bg-gray-50 rounded-lg p-4">
-                          <p className="text-sm text-gray-600 capitalize mb-1">{k.replace(/([A-Z])/g,' $1').trim()}</p>
-                          {editMode ? (
-                            <input type="number" value={v}
-                              onChange={(e)=> updateMetric(selectedDept.id, k, e.target.value)}
-                              className="w-full px-2 py-1 border rounded"/>
-                          ) : (
-                            <p className="text-2xl font-bold text-gray-900">{v || 0}</p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Projects */}
-                  <div className="mb-6">
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">Projects</h3>
-                      {editMode && (
-                        <button onClick={()=> setShowModal(true)} className="px-3 py-1.5 bg-blue-600 text-white rounded-lg font-medium">
-                          + Add Project
-                        </button>
-                      )}
-                    </div>
-
-                    {selectedDept.projects.length>0 ? (
-                      <div className="space-y-3">
-                        {selectedDept.projects.map(p=>(
-                          <div key={p.id} className="border rounded-lg p-4">
-                            <div className="flex justify-between items-start mb-2">
-                              {editMode ? (
-                                <input type="text" value={p.name}
-                                  onChange={(e)=> updateProject(selectedDept.id, p.id, 'name', e.target.value)}
-                                  className="font-medium text-gray-900 px-2 py-1 border rounded flex-1 mr-2"/>
-                              ) : (
-                                <h4 className="font-medium text-gray-900">{p.name}</h4>
-                              )}
-                              <div className="flex items-center gap-2">
-                                {editMode ? (
-                                  <select value={p.status}
-                                    onChange={(e)=> updateProject(selectedDept.id, p.id, 'status', e.target.value)}
-                                    className="px-2 py-1 rounded text-xs font-medium border">
-                                    <option value="green">Green</option>
-                                    <option value="yellow">Yellow</option>
-                                    <option value="red">Red</option>
-                                  </select>
-                                ) : (
-                                  <StatusPill status={p.status}/>
-                                )}
-                                {editMode && (
-                                  <button onClick={()=> deleteProject(selectedDept.id, p.id)} className="text-red-600 hover:text-red-700 text-sm">Delete</button>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                              <div className="flex-1">
-                                <div className="w-full bg-gray-200 rounded-full h-2">
-                                  <div className={`${p.status==='green'?'bg-green-500':p.status==='yellow'?'bg-yellow-500':'bg-red-500'} h-2 rounded-full`} style={{width:`${p.completion}%`}}></div>
-                                </div>
-                              </div>
-                              {editMode ? (
-                                <input type="number" min="0" max="100" value={p.completion}
-                                  onChange={(e)=> updateProject(selectedDept.id, p.id, 'completion', e.target.value)}
-                                  className="w-16 px-2 py-1 border rounded text-sm"/>
-                              ) : (
-                                <span className="text-sm text-gray-600">{p.completion}%</span>
-                              )}
-                              <span className="text-sm text-gray-600">Due: {p.deadline || 'TBD'}</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : <p className="text-gray-500">No projects added yet</p>}
-                  </div>
-
-                  {/* Blockers */}
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Blockers & Escalations</h3>
-                    <div className="space-y-2">
-                      {selectedDept.blockers.map(b => (
-                        <div key={b.id} className="flex items-start gap-2 bg-red-50 p-3 rounded-lg">
-                          <span className="mt-0.5">🚨</span>
-                          <span className="flex-1 text-sm text-red-900">{b.text}</span>
-                          <button onClick={()=> removeBlocker(selectedDept.id, b.id)} className="text-red-600 hover:text-red-700 text-sm">Resolve</button>
-                        </div>
-                      ))}
-                      <div className="flex gap-2">
-                        <input type="text" placeholder="Add new blocker..." className="flex-1 px-3 py-2 border rounded-lg"
-                          onKeyDown={(e)=> { if(e.key==='Enter'){ addBlocker(selectedDept.id, e.currentTarget.value); e.currentTarget.value=''; }}}/>
-                      </div>
-                    </div>
-                  </div>
-
-                  <button onClick={()=> setSelectedDept(null)} className="text-blue-600 hover:text-blue-700 font-medium">← Back to Overview</button>
-
-                  {/* Modal: Add project */}
-                  {showModal && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                      <div className="bg-white rounded-lg p-6 w-96">
-                        <h3 className="text-lg font-semibold mb-4">Add New Project</h3>
-                        <input className="w-full px-3 py-2 border rounded-lg mb-3" placeholder="Project name"
-                          value={newProject.name} onChange={e=> setNewProject({...newProject, name:e.target.value})}/>
-                        <input type="date" className="w-full px-3 py-2 border rounded-lg mb-3"
-                          value={newProject.deadline} onChange={e=> setNewProject({...newProject, deadline:e.target.value})}/>
-                        <select className="w-full px-3 py-2 border rounded-lg mb-3"
-                          value={newProject.status} onChange={e=> setNewProject({...newProject, status:e.target.value})}>
-                          <option value="green">🟢 On Track</option>
-                          <option value="yellow">🟡 At Risk</option>
-                          <option value="red">🔴 Off Track</option>
-                        </select>
-                        <input type="number" min="0" max="100" className="w-full px-3 py-2 border rounded-lg mb-4"
-                          placeholder="Completion %" value={newProject.completion}
-                          onChange={e=> setNewProject({...newProject, completion: Math.min(100, Math.max(0, parseInt(e.target.value||0,10)))})}/>
-                        <div className="flex gap-2">
-                          <button className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium"
-                            onClick={()=> addProject(selectedDept.id)}>Add Project</button>
-                          <button className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium"
-                            onClick={()=> setShowModal(false)}>Cancel</button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <DetailsView
+                  dept={selectedDept}
+                  editMode={editMode}
+                  setEditMode={setEditMode}
+                  updateDeptStatus={updateDeptStatus}
+                  updateMetric={updateMetric}
+                  updateProject={updateProject}
+                  deleteProject={deleteProject}
+                  addProject={addProject}
+                  newProject={newProject}
+                  setNewProject={setNewProject}
+                  showModal={showModal}
+                  setShowModal={setShowModal}
+                  addBlocker={addBlocker}
+                  removeBlocker={removeBlocker}
+                  goBack={()=> setSelectedDept(null)}
+                />
               )}
 
               {/* Weekly updates */}
@@ -515,28 +384,12 @@
                       </div>
 
                       <div className="space-y-4">
-                        <div>
-                          <h4 className="font-medium text-green-700 mb-1">✅ Wins This Week</h4>
-                          <textarea rows="2" className="w-full px-3 py-2 border rounded-lg text-gray-700"
-                            value={d.weeklyUpdate.wins}
-                            onChange={(e)=> updateWeekly(d.id, 'wins', e.target.value)}
-                            placeholder="Enter this week's wins..."></textarea>
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-yellow-700 mb-1">⚠️ Challenges</h4>
-                          <textarea rows="2" className="w-full px-3 py-2 border rounded-lg text-gray-700"
-                            value={d.weeklyUpdate.challenges}
-                            onChange={(e)=> updateWeekly(d.id, 'challenges', e.target.value)}
-                            placeholder="Enter challenges faced..."></textarea>
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-blue-700 mb-1">➡️ Next Week Focus</h4>
-                          <textarea rows="2" className="w-full px-3 py-2 border rounded-lg text-gray-700"
-                            value={d.weeklyUpdate.nextWeek}
-                            onChange={(e)=> updateWeekly(d.id, 'nextWeek', e.target.value)}
-                            placeholder="Enter next week's focus areas..."></textarea>
-                        </div>
-
+                        <Area title="✅ Wins This Week" value={d.weeklyUpdate.wins}
+                          onChange={(v)=> updateWeekly(d.id, 'wins', v)} />
+                        <Area title="⚠️ Challenges" value={d.weeklyUpdate.challenges}
+                          onChange={(v)=> updateWeekly(d.id, 'challenges', v)} />
+                        <Area title="➡️ Next Week Focus" value={d.weeklyUpdate.nextWeek}
+                          onChange={(v)=> updateWeekly(d.id, 'nextWeek', v)} />
                         {d.blockers.length>0 && (
                           <div className="bg-red-50 rounded-lg p-3">
                             <h4 className="font-medium text-red-900 mb-2">🚨 Active Blockers ({d.blockers.length})</h4>
@@ -551,109 +404,19 @@
 
               {/* Monthly snapshot */}
               {viewMode==='monthly' && (
-                <div className="space-y-6">
-                  <div className="bg-white rounded-lg shadow-sm p-6">
-                    <div className="flex justify-between items-center mb-6">
-                      <h2 className="text-2xl font-bold text-gray-900">Monthly Snapshot</h2>
-                      <input type="month" value={selectedMonth}
-                        onChange={(e)=> setSelectedMonth(e.target.value)}
-                        className="px-4 py-2 border rounded-lg"/>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {monthlySnapshot().map(d => (
-                        <div key={d.id} className="border rounded-lg p-4">
-                          <div className="flex justify-between items-start mb-3">
-                            <div>
-                              <h3 className="font-semibold text-gray-900">{d.name}</h3>
-                              <p className="text-sm text-gray-600">{d.manager}</p>
-                            </div>
-                            <StatusPill status={d.status}/>
-                          </div>
-
-                          <div className="space-y-2">
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-gray-600">Updates Posted</span>
-                              <span className="font-semibold">{d.monthlyStats.updates}</span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-gray-600">Projects</span>
-                              <span className="font-semibold">{d.monthlyStats.projectsCompleted}/{d.monthlyStats.projectsTotal}</span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-gray-600">Avg Completion</span>
-                              <div className="flex items-center gap-1">
-                                <span>{d.monthlyStats.avgCompletion>70 ? "📈" : d.monthlyStats.avgCompletion>40 ? "➖" : "📉"}</span>
-                                <span className="font-semibold">{d.monthlyStats.avgCompletion}%</span>
-                              </div>
-                            </div>
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-gray-600">Active Blockers</span>
-                              <span className={`font-semibold ${d.monthlyStats.blockerCount>0?'text-red-600':'text-green-600'}`}>{d.monthlyStats.blockerCount}</span>
-                            </div>
-                          </div>
-
-                          <div className="mt-3 pt-3 border-t">
-                            {d.monthlyStats.avgCompletion>70 && d.monthlyStats.blockerCount===0 ? (
-                              <div className="flex items-center gap-1 text-green-600">
-                                <span>🏅</span><span className="text-xs font-medium">High Performer</span>
-                              </div>
-                            ) : d.monthlyStats.updates < 2 ? (
-                              <div className="flex items-center gap-1 text-yellow-600">
-                                <span>⚠️</span><span className="text-xs font-medium">Needs More Updates</span>
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-1 text-blue-600">
-                                <span>📊</span><span className="text-xs font-medium">On Track</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Roll-up */}
-                    <div className="mt-6 pt-6 border-t">
-                      <h3 className="text-lg font-semibold mb-4">Overall Performance</h3>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {(() => {
-                          const snap = monthlySnapshot();
-                          const totalUpdates = snap.reduce((s,d)=>s+d.monthlyStats.updates,0);
-                          const totalCompleted = snap.reduce((s,d)=>s+d.monthlyStats.projectsCompleted,0);
-                          const avgCompletion = Math.round(snap.reduce((s,d)=>s+d.monthlyStats.avgCompletion,0)/departments.length || 0);
-                          const totalBlockers = snap.reduce((s,d)=>s+d.monthlyStats.blockerCount,0);
-                          return (
-                            <>
-                              <div className="bg-gray-50 rounded-lg p-4">
-                                <p className="text-sm text-gray-600">Total Updates</p>
-                                <p className="text-2xl font-bold text-gray-900">{totalUpdates}</p>
-                              </div>
-                              <div className="bg-gray-50 rounded-lg p-4">
-                                <p className="text-sm text-gray-600">Projects Completed</p>
-                                <p className="text-2xl font-bold text-gray-900">{totalCompleted}</p>
-                              </div>
-                              <div className="bg-gray-50 rounded-lg p-4">
-                                <p className="text-sm text-gray-600">Avg Completion Rate</p>
-                                <p className="text-2xl font-bold text-gray-900">{avgCompletion}%</p>
-                              </div>
-                              <div className="bg-gray-50 rounded-lg p-4">
-                                <p className="text-sm text-gray-600">Total Blockers</p>
-                                <p className="text-2xl font-bold text-gray-900">{totalBlockers}</p>
-                              </div>
-                            </>
-                          );
-                        })()}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <MonthlyView
+                  selectedMonth={selectedMonth}
+                  setSelectedMonth={setSelectedMonth}
+                  snapshot={monthlySnapshot()}
+                  departments={departments}
+                />
               )}
 
               {/* Export */}
               <div className="mt-6 text-center">
                 <button
                   onClick={() => {
-                    const dataStr = JSON.stringify(departments, null, 2);
+                    const dataStr = JSON.stringify({departments, history}, null, 2);
                     const uri = 'data:application/json;charset=utf-8,'+encodeURIComponent(dataStr);
                     const name = `ceo-dashboard-${new Date().toISOString().split('T')[0]}.json`;
                     const a = document.createElement('a');
@@ -661,18 +424,264 @@
                     document.body.appendChild(a); a.click(); a.remove();
                   }}
                   className="text-sm text-gray-500 hover:text-gray-700"
-                >
-                  Export Data (JSON)
-                </button>
+                >Export Data (JSON)</button>
               </div>
             </div>
           </div>
         );
       }
 
+      /* --- Small components --- */
+      const CardStat = ({label, value, cls, valCls}) => (
+        <div className={`${cls} rounded-lg p-3`}>
+          <div className="flex items-center justify-between">
+            <span className="font-medium text-sm">{label}</span>
+            <span className={`text-xl font-bold ${valCls}`}>{value}</span>
+          </div>
+        </div>
+      );
+
+      const Area = ({title, value, onChange}) => (
+        <div>
+          <h4 className="font-medium mb-1">{title}</h4>
+          <textarea rows="2" className="w-full px-3 py-2 border rounded-lg text-gray-700"
+            value={value} onChange={(e)=> onChange(e.target.value)} />
+        </div>
+      );
+
+      function DetailsView(props){
+        const { dept, editMode, setEditMode, updateDeptStatus, updateMetric,
+                updateProject, deleteProject, addProject, newProject, setNewProject,
+                showModal, setShowModal, addBlocker, removeBlocker, goBack } = props;
+
+        return (
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">{dept.name}</h2>
+                <p className="text-gray-600">Manager: {dept.manager}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button onClick={()=> setEditMode(m=>!m)}
+                  className={`px-3 py-1.5 rounded-lg font-medium ${editMode?'bg-green-600 text-white':'bg-gray-100 text-gray-700'}`}>
+                  {editMode ? 'Done' : 'Edit'}
+                </button>
+                <select value={dept.status} onChange={(e)=> updateDeptStatus(dept.id, e.target.value)}
+                  className="px-4 py-2 rounded-lg font-medium border-2">
+                  <option value="green">🟢 On Track</option>
+                  <option value="yellow">🟡 At Risk</option>
+                  <option value="red">🔴 Off Track</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Key Metrics</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {Object.entries(dept.keyMetrics).map(([k,v])=>(
+                  <div key={k} className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-sm text-gray-600 capitalize mb-1">{k.replace(/([A-Z])/g,' $1').trim()}</p>
+                    {editMode ? (
+                      <input type="number" value={v}
+                        onChange={(e)=> updateMetric(dept.id, k, e.target.value)}
+                        className="w-full px-2 py-1 border rounded"/>
+                    ) : (
+                      <p className="text-2xl font-bold text-gray-900">{v || 0}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Projects</h3>
+                {editMode && (
+                  <button onClick={()=> setShowModal(true)} className="px-3 py-1.5 bg-blue-600 text-white rounded-lg font-medium">
+                    + Add Project
+                  </button>
+                )}
+              </div>
+
+              {dept.projects.length>0 ? (
+                <div className="space-y-3">
+                  {dept.projects.map(p=>(
+                    <div key={p.id} className="border rounded-lg p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        {editMode ? (
+                          <input type="text" value={p.name}
+                            onChange={(e)=> updateProject(dept.id, p.id, 'name', e.target.value)}
+                            className="font-medium text-gray-900 px-2 py-1 border rounded flex-1 mr-2"/>
+                        ) : (
+                          <h4 className="font-medium text-gray-900">{p.name}</h4>
+                        )}
+                        <div className="flex items-center gap-2">
+                          {editMode ? (
+                            <select value={p.status}
+                              onChange={(e)=> updateProject(dept.id, p.id, 'status', e.target.value)}
+                              className="px-2 py-1 rounded text-xs font-medium border">
+                              <option value="green">Green</option>
+                              <option value="yellow">Yellow</option>
+                              <option value="red">Red</option>
+                            </select>
+                          ) : (
+                            <StatusPill status={p.status}/>
+                          )}
+                          {editMode && (
+                            <button onClick={()=> deleteProject(dept.id, p.id)} className="text-red-600 hover:text-red-700 text-sm">Delete</button>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="flex-1">
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div className={`${p.status==='green'?'bg-green-500':p.status==='yellow'?'bg-yellow-500':'bg-red-500'} h-2 rounded-full`} style={{width:`${p.completion}%`}}></div>
+                          </div>
+                        </div>
+                        {editMode ? (
+                          <input type="number" min="0" max="100" value={p.completion}
+                            onChange={(e)=> updateProject(dept.id, p.id, 'completion', e.target.value)}
+                            className="w-16 px-2 py-1 border rounded text-sm"/>
+                        ) : (
+                          <span className="text-sm text-gray-600">{p.completion}%</span>
+                        )}
+                        <span className="text-sm text-gray-600">Due: {p.deadline || 'TBD'}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : <p className="text-gray-500">No projects added yet</p>}
+            </div>
+
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Blockers & Escalations</h3>
+              <div className="space-y-2">
+                {dept.blockers.map(b => (
+                  <div key={b.id} className="flex items-start gap-2 bg-red-50 p-3 rounded-lg">
+                    <span className="mt-0.5">🚨</span>
+                    <span className="flex-1 text-sm text-red-900">{b.text}</span>
+                    <button onClick={()=> removeBlocker(dept.id, b.id)} className="text-red-600 hover:text-red-700 text-sm">Resolve</button>
+                  </div>
+                ))}
+                <div className="flex gap-2">
+                  <input type="text" placeholder="Add new blocker..." className="flex-1 px-3 py-2 border rounded-lg"
+                    onKeyDown={(e)=> { if(e.key==='Enter'){ addBlocker(dept.id, e.currentTarget.value); e.currentTarget.value=''; }}}/>
+                </div>
+              </div>
+            </div>
+
+            <button onClick={goBack} className="text-blue-600 hover:text-blue-700 font-medium">← Back to Overview</button>
+
+            {showModal && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg p-6 w-96">
+                  <h3 className="text-lg font-semibold mb-4">Add New Project</h3>
+                  <input className="w-full px-3 py-2 border rounded-lg mb-3" placeholder="Project name"
+                    value={newProject.name} onChange={e=> setNewProject({...newProject, name:e.target.value})}/>
+                  <input type="date" className="w-full px-3 py-2 border rounded-lg mb-3"
+                    value={newProject.deadline} onChange={e=> setNewProject({...newProject, deadline:e.target.value})}/>
+                  <select className="w-full px-3 py-2 border rounded-lg mb-3"
+                    value={newProject.status} onChange={e=> setNewProject({...newProject, status:e.target.value})}>
+                    <option value="green">🟢 On Track</option>
+                    <option value="yellow">🟡 At Risk</option>
+                    <option value="red">🔴 Off Track</option>
+                  </select>
+                  <input type="number" min="0" max="100" className="w-full px-3 py-2 border rounded-lg mb-4"
+                    placeholder="Completion %" value={newProject.completion}
+                    onChange={e=> setNewProject({...newProject, completion: Math.min(100, Math.max(0, parseInt(e.target.value||0,10)))})}/>
+                  <div className="flex gap-2">
+                    <button className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium"
+                      onClick={()=> addProject(dept.id)}>Add Project</button>
+                    <button className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium"
+                      onClick={()=> setShowModal(false)}>Cancel</button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      const MonthlyView = ({selectedMonth, setSelectedMonth, snapshot, departments}) => (
+        <div className="space-y-6">
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Monthly Snapshot</h2>
+              <input type="month" value={selectedMonth} onChange={(e)=> setSelectedMonth(e.target.value)}
+                className="px-4 py-2 border rounded-lg"/>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {snapshot.map(d => (
+                <div key={d.id} className="border rounded-lg p-4">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{d.name}</h3>
+                      <p className="text-sm text-gray-600">{d.manager}</p>
+                    </div>
+                    <StatusPill status={d.status}/>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Row label="Updates Posted" value={d.monthlyStats.updates} />
+                    <Row label="Projects" value={`${d.monthlyStats.projectsCompleted}/${d.monthlyStats.projectsTotal}`} />
+                    <Row label="Avg Completion" value={`${d.monthlyStats.avgCompletion}%`} />
+                    <Row label="Active Blockers" value={d.monthlyStats.blockerCount} />
+                  </div>
+
+                  <div className="mt-3 pt-3 border-t">
+                    {d.monthlyStats.avgCompletion>70 && d.monthlyStats.blockerCount=== 0 ? (
+                      <Badge text="High Performer" tone="green">🏅</Badge>
+                    ) : d.monthlyStats.updates < 2 ? (
+                      <Badge text="Needs More Updates" tone="yellow">⚠️</Badge>
+                    ) : (
+                      <Badge text="On Track" tone="blue">📊</Badge>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-6 pt-6 border-t">
+              <h3 className="text-lg font-semibold mb-4">Overall Performance</h3>
+              {(() => {
+                const totalUpdates   = snapshot.reduce((s,d)=>s+d.monthlyStats.updates,0);
+                const totalCompleted = snapshot.reduce((s,d)=>s+d.monthlyStats.projectsCompleted,0);
+                const avgCompletion  = Math.round(snapshot.reduce((s,d)=>s+d.monthlyStats.avgCompletion,0)/departments.length || 0);
+                const totalBlockers  = snapshot.reduce((s,d)=>s+d.monthlyStats.blockerCount,0);
+                return (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <Card label="Total Updates" value={totalUpdates}/>
+                    <Card label="Projects Completed" value={totalCompleted}/>
+                    <Card label="Avg Completion Rate" value={`${avgCompletion}%`}/>
+                    <Card label="Total Blockers" value={totalBlockers}/>
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+        </div>
+      );
+
+      const Row = ({label, value}) => (
+        <div className="flex justify-between items-center">
+          <span className="text-sm text-gray-600">{label}</span>
+          <span className="font-semibold">{value}</span>
+        </div>
+      );
+      const Card = ({label, value}) => (
+        <div className="bg-gray-50 rounded-lg p-4">
+          <p className="text-sm text-gray-600">{label}</p>
+          <p className="text-2xl font-bold text-gray-900">{value}</p>
+        </div>
+      );
+      const Badge = ({children, text, tone}) => {
+        const color = tone==='green'?'text-green-600':tone==='yellow'?'text-yellow-600':'text-blue-600';
+        return <div className={`flex items-center gap-1 ${color}`}><span>{children}</span><span className="text-xs font-medium">{text}</span></div>;
+      };
+
       // Mount
-      const root = ReactDOM.createRoot(document.getElementById('root'));
-      root.render(<CEODashboard />);
+      ReactDOM.createRoot(document.getElementById('root')).render(<CEODashboard />);
     </script>
   </body>
 </html>
