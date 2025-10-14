@@ -29,7 +29,6 @@
       const { useState, useEffect, useRef } = React;
 
       /* ======== FIREBASE INIT ======== */
-      // ⬇️ Replace with your real config from Firebase console (no extra quotes/commas)
       const firebaseConfig = {
         apiKey: "AIzaSyAyt3CXWIKQ_bjQN48cw-GSXKKP5FbCoWs",
         authDomain: "ceo-visibility-tool-75651.firebaseapp.com",
@@ -40,7 +39,7 @@
       };
       if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
       const db = firebase.firestore();
-      const docRef = db.collection("ceo-dashboard").doc("state"); // shared doc
+      const docRef = db.collection("ceo-dashboard").doc("state");
 
       const clientId = (crypto?.randomUUID?.() || Math.random().toString(36).slice(2));
       const today = () => new Date().toISOString().split("T")[0];
@@ -60,7 +59,6 @@
       };
 
       function CEODashboard() {
-        // Initial dataset (Pharmacy, HR, Social Media & Marketing included)
         const initialDepartments = [
           { id:'ops', name:'Operations', manager:'Jagan', status:'green',
             keyMetrics:{ efficiency:0, tasksCompleted:0, onTimeDelivery:0, qualityScore:0 },
@@ -100,18 +98,16 @@
             projects:[], blockers:[], weeklyUpdate:{ wins:'',challenges:'',nextWeek:'',date:today() } },
         ];
 
-        // Read cache for fast first paint; live Firestore will override
         const cached = (() => {
           try { return JSON.parse(localStorage.getItem("ceoDashboardCache") || "null"); } catch { return null; }
         })();
 
+        // ✅ FIXED: Single declarations only
         const [departments, setDepartments] = useState(cached?.departments || initialDepartments);
         const [history, setHistory] = useState(cached?.history || []);
-        const [departments, setDepartments] = useState(cached?.departments || initialDepartments);
-const [history, setHistory] = useState(cached?.history || []);
-const [synced, setSynced] = useState(false); // ADD THIS LINE
+        const [synced, setSynced] = useState(false);
         const [viewMode, setViewMode] = useState('overview');
-        const [selectedDeptId, setSelectedDeptId] = useState(null); // <-- use ID, not object
+        const [selectedDeptId, setSelectedDeptId] = useState(null);
         const [editMode, setEditMode] = useState(false);
         const [newProject, setNewProject] = useState({ name:'', deadline:'', status:'green', completion:0, comments:'' });
         const [showModal, setShowModal] = useState(false);
@@ -120,36 +116,9 @@ const [synced, setSynced] = useState(false); // ADD THIS LINE
         const savingRef = useRef(false);
         const debounceRef = useRef(null);
 
-        // Real-time listener
-       useEffect(() => {
-  const unsub = docRef.onSnapshot(async (snap) => {
-    if (!snap.exists) {
-      await docRef.set({
-        departments: initialDepartments,
-        updateHistory: [],
-        lastSavedAt: new Date().toISOString(),
-        _lastWriter: clientId
-      });
-      setSynced(true); // ADD THIS
-      return;
-    }
-    const data = snap.data();
-    
-    // ALWAYS update state from Firestore (remove the clientId check that was causing issues)
-    setDepartments(data.departments || initialDepartments);
-    setHistory(data.updateHistory || []);
-    setLastSaved(new Date(data.lastSavedAt || Date.now()).toLocaleString());
-    setSynced(true); // ADD THIS
-    
-    // Update cache
-    localStorage.setItem("ceoDashboardCache", JSON.stringify({
-      departments: data.departments || initialDepartments,
-      history: data.updateHistory || [],
-      lastSavedAt: data.lastSavedAt || new Date().toISOString()
-    }));
-  });
-  return () => unsub();
-}, []);
+        // ✅ FIXED: Real-time listener (clean version)
+        useEffect(() => {
+          const unsub = docRef.onSnapshot(async (snap) => {
             if (!snap.exists) {
               await docRef.set({
                 departments: initialDepartments,
@@ -157,13 +126,18 @@ const [synced, setSynced] = useState(false); // ADD THIS LINE
                 lastSavedAt: new Date().toISOString(),
                 _lastWriter: clientId
               });
+              setSynced(true);
               return;
             }
             const data = snap.data();
-            if (data?._lastWriter === clientId) return; // ignore our own write echo
+            
+            // Always update from Firestore
             setDepartments(data.departments || initialDepartments);
             setHistory(data.updateHistory || []);
             setLastSaved(new Date(data.lastSavedAt || Date.now()).toLocaleString());
+            setSynced(true);
+            
+            // Update cache
             localStorage.setItem("ceoDashboardCache", JSON.stringify({
               departments: data.departments || initialDepartments,
               history: data.updateHistory || [],
@@ -173,34 +147,28 @@ const [synced, setSynced] = useState(false); // ADD THIS LINE
           return () => unsub();
         }, []);
 
-        // Autosave (debounced)
-       useEffect(() => {
-  // Don't save to Firestore until we've synced with the server first!
-  if (!synced) return;
-  
-  localStorage.setItem("ceoDashboardCache", JSON.stringify({
-    departments, history, lastSavedAt: new Date().toISOString()
-  }));
-  if (debounceRef.current) clearTimeout(debounceRef.current);
-  debounceRef.current = setTimeout(async () => {
-    savingRef.current = true;
-    const lastSavedAt = new Date().toISOString();
-    await docRef.set({ departments, updateHistory: history, lastSavedAt, _lastWriter: clientId }, { merge: true });
-    setLastSaved(new Date(lastSavedAt).toLocaleString());
-    savingRef.current = false;
-  }, 700);
-}, [departments, history, synced]); // ADD synced to dependency array
+        // ✅ FIXED: Autosave (clean version)
+        useEffect(() => {
+          if (!synced) return; // Wait for initial sync
+          
+          localStorage.setItem("ceoDashboardCache", JSON.stringify({
             departments, history, lastSavedAt: new Date().toISOString()
           }));
+          
           if (debounceRef.current) clearTimeout(debounceRef.current);
           debounceRef.current = setTimeout(async () => {
             savingRef.current = true;
             const lastSavedAt = new Date().toISOString();
-            await docRef.set({ departments, updateHistory: history, lastSavedAt, _lastWriter: clientId }, { merge: true });
+            await docRef.set({ 
+              departments, 
+              updateHistory: history, 
+              lastSavedAt, 
+              _lastWriter: clientId 
+            }, { merge: true });
             setLastSaved(new Date(lastSavedAt).toLocaleString());
             savingRef.current = false;
           }, 700);
-        }, [departments, history]);
+        }, [departments, history, synced]);
 
         // Mutators
         const updateDeptStatus = (id, status) => {
@@ -265,33 +233,30 @@ const [synced, setSynced] = useState(false); // ADD THIS LINE
           });
         };
 
-        // Header stats
         const onTrack = departments.filter(d=>d.status==='green').length;
         const atRisk  = departments.filter(d=>d.status==='yellow').length;
         const offTrack= departments.filter(d=>d.status==='red').length;
         const blockers= departments.reduce((s,d)=>s+d.blockers.length,0);
         const projects= departments.reduce((s,d)=>s+d.projects.length,0);
 
-        // Live dept for details view
         const liveDept = selectedDeptId ? departments.find(d => d.id === selectedDeptId) : null;
 
         return (
-  <div className="min-h-screen p-4 md:p-6">
-    {/* ADD THIS ENTIRE SECTION - Loading indicator */}
-    {!synced && (
-      <div className="fixed inset-0 bg-white/90 flex items-center justify-center z-50">
-        <div className="text-center">
-          <div className="text-2xl mb-2">⏳</div>
-          <div className="text-lg font-semibold">Syncing with server...</div>
-          <div className="text-sm text-gray-600">Loading latest data</div>
-        </div>
-      </div>
-    )}
-    {/* END OF ADDITION */}
-    
-    <div className="max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+          <div className="min-h-screen p-4 md:p-6">
+            {/* ✅ Loading indicator */}
+            {!synced && (
+              <div className="fixed inset-0 bg-white/90 flex items-center justify-center z-50">
+                <div className="text-center">
+                  <div className="text-2xl mb-2">⏳</div>
+                  <div className="text-lg font-semibold">Syncing with server...</div>
+                  <div className="text-sm text-gray-600">Loading latest data</div>
+                </div>
+              </div>
+            )}
+
+            <div className="max-w-7xl mx-auto">
+              {/* Header */}
+              <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <div>
                     <h1 className="text-2xl md:text-3xl font-bold text-gray-900">CEO Visibility Dashboard</h1>
@@ -317,7 +282,7 @@ const [synced, setSynced] = useState(false); // ADD THIS LINE
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 mt-4">
                   {['overview','details','updates','monthly'].map(mode => (
                     <button key={mode}
                       onClick={()=> setViewMode(mode)}
@@ -332,7 +297,6 @@ const [synced, setSynced] = useState(false); // ADD THIS LINE
                   ))}
                 </div>
 
-                {/* Quick stats */}
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-6">
                   <CardStat label="On Track" value={onTrack} cls="bg-green-50 text-green-900" valCls="text-green-600"/>
                   <CardStat label="At Risk" value={atRisk} cls="bg-yellow-50 text-yellow-900" valCls="text-yellow-600"/>
@@ -399,7 +363,7 @@ const [synced, setSynced] = useState(false); // ADD THIS LINE
               {/* Details */}
               {viewMode==='details' && liveDept && (
                 <DetailsView
-                  dept={liveDept}  /* <-- always the live object */
+                  dept={liveDept}
                   editMode={editMode}
                   setEditMode={setEditMode}
                   updateDeptStatus={updateDeptStatus}
@@ -598,7 +562,6 @@ const [synced, setSynced] = useState(false); // ADD THIS LINE
                         <span className="text-sm text-gray-600">Due: {p.deadline || 'TBD'}</span>
                       </div>
 
-                      {/* Comments */}
                       <div>
                         <label className="text-sm font-medium text-gray-700 block mb-1">Comments / Notes</label>
                         {editMode ? (
