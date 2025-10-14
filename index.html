@@ -107,6 +107,9 @@
 
         const [departments, setDepartments] = useState(cached?.departments || initialDepartments);
         const [history, setHistory] = useState(cached?.history || []);
+        const [departments, setDepartments] = useState(cached?.departments || initialDepartments);
+const [history, setHistory] = useState(cached?.history || []);
+const [synced, setSynced] = useState(false); // ADD THIS LINE
         const [viewMode, setViewMode] = useState('overview');
         const [selectedDeptId, setSelectedDeptId] = useState(null); // <-- use ID, not object
         const [editMode, setEditMode] = useState(false);
@@ -118,8 +121,35 @@
         const debounceRef = useRef(null);
 
         // Real-time listener
-        useEffect(() => {
-          const unsub = docRef.onSnapshot(async (snap) => {
+       useEffect(() => {
+  const unsub = docRef.onSnapshot(async (snap) => {
+    if (!snap.exists) {
+      await docRef.set({
+        departments: initialDepartments,
+        updateHistory: [],
+        lastSavedAt: new Date().toISOString(),
+        _lastWriter: clientId
+      });
+      setSynced(true); // ADD THIS
+      return;
+    }
+    const data = snap.data();
+    
+    // ALWAYS update state from Firestore (remove the clientId check that was causing issues)
+    setDepartments(data.departments || initialDepartments);
+    setHistory(data.updateHistory || []);
+    setLastSaved(new Date(data.lastSavedAt || Date.now()).toLocaleString());
+    setSynced(true); // ADD THIS
+    
+    // Update cache
+    localStorage.setItem("ceoDashboardCache", JSON.stringify({
+      departments: data.departments || initialDepartments,
+      history: data.updateHistory || [],
+      lastSavedAt: data.lastSavedAt || new Date().toISOString()
+    }));
+  });
+  return () => unsub();
+}, []);
             if (!snap.exists) {
               await docRef.set({
                 departments: initialDepartments,
@@ -144,8 +174,22 @@
         }, []);
 
         // Autosave (debounced)
-        useEffect(() => {
-          localStorage.setItem("ceoDashboardCache", JSON.stringify({
+       useEffect(() => {
+  // Don't save to Firestore until we've synced with the server first!
+  if (!synced) return;
+  
+  localStorage.setItem("ceoDashboardCache", JSON.stringify({
+    departments, history, lastSavedAt: new Date().toISOString()
+  }));
+  if (debounceRef.current) clearTimeout(debounceRef.current);
+  debounceRef.current = setTimeout(async () => {
+    savingRef.current = true;
+    const lastSavedAt = new Date().toISOString();
+    await docRef.set({ departments, updateHistory: history, lastSavedAt, _lastWriter: clientId }, { merge: true });
+    setLastSaved(new Date(lastSavedAt).toLocaleString());
+    savingRef.current = false;
+  }, 700);
+}, [departments, history, synced]); // ADD synced to dependency array
             departments, history, lastSavedAt: new Date().toISOString()
           }));
           if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -232,10 +276,22 @@
         const liveDept = selectedDeptId ? departments.find(d => d.id === selectedDeptId) : null;
 
         return (
-          <div className="min-h-screen p-4 md:p-6">
-            <div className="max-w-7xl mx-auto">
-              {/* Header */}
-              <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+  <div className="min-h-screen p-4 md:p-6">
+    {/* ADD THIS ENTIRE SECTION - Loading indicator */}
+    {!synced && (
+      <div className="fixed inset-0 bg-white/90 flex items-center justify-center z-50">
+        <div className="text-center">
+          <div className="text-2xl mb-2">⏳</div>
+          <div className="text-lg font-semibold">Syncing with server...</div>
+          <div className="text-sm text-gray-600">Loading latest data</div>
+        </div>
+      </div>
+    )}
+    {/* END OF ADDITION */}
+    
+    <div className="max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <div>
                     <h1 className="text-2xl md:text-3xl font-bold text-gray-900">CEO Visibility Dashboard</h1>
